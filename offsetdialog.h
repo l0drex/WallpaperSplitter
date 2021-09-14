@@ -26,6 +26,11 @@ private:
     Ui::OffsetDialog *ui;
 
     void addScreens(QList<QScreen *> &screens);
+    void scaleView();
+
+protected:
+    void showEvent(QShowEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
 };
 
 

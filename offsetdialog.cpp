@@ -40,7 +40,7 @@ void OffsetDialog::addScreens(QList<QScreen *> &screens) {
     // draw a rectangle for every screen
     auto screenRectList = QList<QGraphicsItem *>();
     std::for_each(screens.begin(), screens.end(), [&](const QScreen* screen){
-        auto pen = QPen(colorScheme.foreground(), 1);
+        auto pen = QPen(colorScheme.foreground(), 2);
         auto rect = ui->imageView->scene()->addRect(screen->geometry(), pen);
         screenRectList.append(rect);
     });
@@ -54,6 +54,30 @@ void OffsetDialog::addScreens(QList<QScreen *> &screens) {
     ui->imageView->scene()->addPolygon(background, QPen(QColor("transparent")), backgroundColor);
 
     // TODO make the screen item movable by the user, probably via signal and slots
+}
+
+void OffsetDialog::showEvent(QShowEvent *event) {
+    QDialog::showEvent(event);
+    scaleView();
+}
+
+void OffsetDialog::resizeEvent(QResizeEvent *event) {
+    QDialog::resizeEvent(event);
+    scaleView();
+}
+
+void OffsetDialog::scaleView() {
+    auto scene = ui->imageView->scene();
+    double scale;
+    ui->imageView->resetTransform();
+    if(scene->height() > scene -> width()) {
+        scale = ui->imageView->height() / scene->height();
+    } else {
+        // FIXME width is always off by a few pixels
+        scale = ui->imageView->width() / scene->width();
+    }
+
+    ui->imageView->scale(scale, scale);
 }
 
 QSize OffsetDialog::getOffset(QImage &image, QList<QScreen *> &screens) {
