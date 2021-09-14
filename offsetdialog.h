@@ -29,7 +29,7 @@ private:
     void addScreens(QList<QScreen *> &screens);
     void scaleView();
 
-protected:
+private slots:
     void showEvent(QShowEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
 };

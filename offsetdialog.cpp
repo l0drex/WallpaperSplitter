@@ -30,7 +30,8 @@ void OffsetDialog::addImage(QImage &image) {
      */
     auto pixmap = new QPixmap();
     pixmap->convertFromImage(image);
-    ui->imageView->scene()->addPixmap(*pixmap);
+    auto item = ui->imageView->scene()->addPixmap(*pixmap);
+    item->setFlag(QGraphicsItem::ItemClipsChildrenToShape);  // FIXME group escapes somehow
 }
 
 void OffsetDialog::addScreens(QList<QScreen *> &screens) {
@@ -38,22 +39,26 @@ void OffsetDialog::addScreens(QList<QScreen *> &screens) {
     auto colorScheme = KColorScheme(QPalette::Normal, KColorScheme::ColorSet::Complementary);
 
     // draw a rectangle for every screen
-    auto screenRectList = QList<QGraphicsItem *>();
+    // all rectangles are in a group that is a child of the image, so that they clip to the borders
+    auto image = ui->imageView->scene()->items().first();
+    auto group = new QGraphicsItemGroup(image);
     std::for_each(screens.begin(), screens.end(), [&](const QScreen* screen){
         auto pen = QPen(colorScheme.foreground(), 2);
         auto rect = ui->imageView->scene()->addRect(screen->geometry(), pen);
-        screenRectList.append(rect);
+        group -> addToGroup(rect);
     });
-    auto group = ui->imageView->scene()->createItemGroup(screenRectList);
 
     // darken the background around the screen rectangles
+    // TODO try the ItemDoesntPropagateOpacityToChildren flag
     auto backgroundColor = colorScheme.shade(KColorScheme::ShadeRole::DarkShade);
     backgroundColor.setAlpha(128);
     auto background = QPolygonF(ui->imageView->sceneRect());
     background = background.subtracted(group->childrenBoundingRect());
     ui->imageView->scene()->addPolygon(background, QPen(QColor("transparent")), backgroundColor);
 
-    // TODO make the screen item movable by the user, probably via signal and slots
+    // make the screen item movable by the user
+    group->setAcceptedMouseButtons(Qt::MouseButton::LeftButton);
+    group->setFlag(QGraphicsItem::ItemIsMovable);
 }
 
 void OffsetDialog::showEvent(QShowEvent *event) {
