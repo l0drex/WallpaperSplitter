@@ -82,14 +82,13 @@ void OffsetDialog::scaleView() {
 }
 
 QSize OffsetDialog::getOffset(QImage &image, QList<QScreen *> &screens) {
-    // TODO exit on cancel or closing window
-
     // set up the dialog
     auto offsetDialog = new OffsetDialog();
     offsetDialog -> addImage(image);
     offsetDialog -> addScreens(screens);
 
-    offsetDialog -> exec();
+    int success = offsetDialog -> exec();
+    if(success != 0) QApplication::quit();
 
     // the offset is the position of the screen rectangle element
     auto screenRect = QRect();  // = offsetDialog->ui->imageView->findChild<QRect>("ScreenRect");
