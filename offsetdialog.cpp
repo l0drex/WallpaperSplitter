@@ -17,6 +17,7 @@
 OffsetDialog::OffsetDialog(QWidget *parent) :
         QDialog(parent), ui(new Ui::OffsetDialog) {
     ui->setupUi(this);
+    ui->imageView->setScene(new QGraphicsScene(this));
 }
 
 OffsetDialog::~OffsetDialog() {
@@ -24,34 +25,48 @@ OffsetDialog::~OffsetDialog() {
 }
 
 void OffsetDialog::addImage(QImage &image) {
+    /**
+     * Adds the image to the graphics view
+     */
     auto pixmap = new QPixmap();
     pixmap->convertFromImage(image);
-    auto scene = new QGraphicsScene(this);
-    scene->addPixmap(*pixmap);
-    ui->imageView->setScene(scene);
+    ui->imageView->scene()->addPixmap(*pixmap);
 }
 
-void OffsetDialog::addScreens(QList<QScreen *> screens) {
+void OffsetDialog::addScreens(QList<QScreen *> &screens) {
+    // get the currently used color scheme
     auto colorScheme = KColorScheme(QPalette::Normal, KColorScheme::ColorSet::Complementary);
-    auto backgroundColor = colorScheme.shade(KColorScheme::ShadeRole::DarkShade);
-    backgroundColor.setAlpha(128);
-    ui->imageView->scene()->addRect(ui->imageView->sceneRect(), QPen(), backgroundColor);
+
+    // draw a rectangle for every screen
     auto screenRectList = QList<QGraphicsItem *>();
     std::for_each(screens.begin(), screens.end(), [&](const QScreen* screen){
-        // Todo merge rectangles in one widget or something
-        // TODO make it moveable by the user
-        screenRectList.append(new QGraphicsRectItem(screen->geometry()));
-        //ui->imageView->scene()->addRect(screen->geometry(), pen);
+        auto pen = QPen(colorScheme.foreground(), 1);
+        auto rect = ui->imageView->scene()->addRect(screen->geometry(), pen);
+        screenRectList.append(rect);
     });
     auto group = ui->imageView->scene()->createItemGroup(screenRectList);
+
+    // darken the background around the screen rectangles
+    auto backgroundColor = colorScheme.shade(KColorScheme::ShadeRole::DarkShade);
+    backgroundColor.setAlpha(128);
+    auto background = QPolygonF(ui->imageView->sceneRect());
+    background = background.subtracted(group->childrenBoundingRect());
+    ui->imageView->scene()->addPolygon(background, QPen(QColor("transparent")), backgroundColor);
+
+    // TODO make the screen item movable by the user, probably via signal and slots
 }
 
 QSize OffsetDialog::getOffset(QImage &image, QList<QScreen *> &screens) {
     // TODO exit on cancel or closing window
+
+    // set up the dialog
     auto offsetDialog = new OffsetDialog();
     offsetDialog -> addImage(image);
     offsetDialog -> addScreens(screens);
+
     offsetDialog -> exec();
+
+    // the offset is the position of the screen rectangle element
     auto screenRect = QRect();  // = offsetDialog->ui->imageView->findChild<QRect>("ScreenRect");
     auto offset = QSize(screenRect.x(), screenRect.y());
     return offset;

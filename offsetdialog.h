@@ -25,7 +25,7 @@ public:
 private:
     Ui::OffsetDialog *ui;
 
-    void addScreens(QList<QScreen *> screens);
+    void addScreens(QList<QScreen *> &screens);
 };
 
 

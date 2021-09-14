@@ -79,7 +79,7 @@ auto split_image(QFileInfo &fileInfo) {
 
     QImage wallpaper;
     QString directory = fileInfo.absolutePath() + '/' + fileInfo.baseName() + "_split";
-    QDir().mkdir(directory);
+    // QDir().mkdir(directory);
     // list of the paths to return
     auto paths = QStringList();
 
