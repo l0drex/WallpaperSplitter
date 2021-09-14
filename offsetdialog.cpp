@@ -77,7 +77,8 @@ void OffsetDialog::done(int i) {
 }
 
 void OffsetDialog::scaleView() {
-    ui->imageView->fitInView(ui->imageView->sceneRect(), Qt::AspectRatioMode::KeepAspectRatio);
+    // FIXME ensure that this is indeed the image and not something else
+    ui->imageView->fitInView(ui->imageView->scene()->items().first()->boundingRect(), Qt::AspectRatioMode::KeepAspectRatio);
 }
 
 QSize OffsetDialog::getOffset(QImage &image, QList<QScreen *> &screens) {
