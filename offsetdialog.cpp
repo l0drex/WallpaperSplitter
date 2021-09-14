@@ -72,17 +72,7 @@ void OffsetDialog::done(int i) {
 }
 
 void OffsetDialog::scaleView() {
-    auto scene = ui->imageView->scene();
-    double scale;
-    ui->imageView->resetTransform();
-    if(scene->height() > scene -> width()) {
-        scale = ui->imageView->height() / scene->height();
-    } else {
-        // FIXME width is always off by a few pixels
-        scale = ui->imageView->width() / scene->width();
-    }
-
-    ui->imageView->scale(scale, scale);
+    ui->imageView->fitInView(ui->imageView->sceneRect(), Qt::AspectRatioMode::KeepAspectRatio);
 }
 
 QSize OffsetDialog::getOffset(QImage &image, QList<QScreen *> &screens) {
