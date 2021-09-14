@@ -1,13 +1,4 @@
 #include <QApplication>
-#include <QDebug>
-#include <QScreen>
-#include <QSize>
-#include <QImage>
-#include <QDesktopWidget>
-#include <QFileDialog>
-#include <QStandardPaths>
-#include <QException>
-#include <utility>
 #include "offsetdialog.h"
 #include "wallpapersplitter.h"
 
