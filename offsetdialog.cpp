@@ -66,6 +66,11 @@ void OffsetDialog::resizeEvent(QResizeEvent *event) {
     scaleView();
 }
 
+void OffsetDialog::done(int i) {
+    QDialog::done(i);
+    exit(0);
+}
+
 void OffsetDialog::scaleView() {
     auto scene = ui->imageView->scene();
     double scale;

@@ -19,6 +19,7 @@ Q_OBJECT
 public:
     explicit OffsetDialog(QWidget *parent = nullptr);
     ~OffsetDialog() override;
+    void done(int i) override;
     void addImage(QImage &image);
     static QSize getOffset(QImage &image, QList<QScreen *> &screens);
 
