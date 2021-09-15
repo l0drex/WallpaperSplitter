@@ -97,6 +97,8 @@ void WallpaperSplitter::split_image() {
         // add offset
         geometry.setX(geometry.x() + offset -> width());
         geometry.setY(geometry.y() + offset -> height());
+        geometry.setWidth(geometry.width() + offset -> width());
+        geometry.setHeight(geometry.height() + offset -> height());
         wallpaper = image -> copy(geometry);
 
         // images are saved in a subdirectory called split with a number as suffix
