@@ -122,7 +122,6 @@ void WallpaperSplitter::apply_wallpapers() {
     QTextStream out(&script);
     assert(!paths->isEmpty());
     qDebug() << paths->join("', '");
-    // FIXME this script is not reliable
     // language=JavaScript
     out << "var paths = ['" + paths->join("', '") + "'];"
         << "var path_iterator = 0;"
@@ -131,8 +130,8 @@ void WallpaperSplitter::apply_wallpapers() {
         << "    var d = desktopsForActivity(activity)[key];"
         << "    d.wallpaperPlugin = 'org.kde.image';"
         << "    d.currentConfigGroup = ['Wallpaper', 'org.kde.image', 'General'];"
+        << "    d.writeConfig('Image', paths[path_iterator]);"
         << "    if(key > 0) {"
-        << "        d.writeConfig('Image', paths[path_iterator]);"
         << "        path_iterator++;"
         << "}}";
     auto message = QDBusMessage::createMethodCall(
