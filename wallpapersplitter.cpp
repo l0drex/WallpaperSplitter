@@ -22,7 +22,7 @@ WallpaperSplitter::WallpaperSplitter(QWidget *parent) :
     ui->setupUi(this);
     fileInfo = new QFileInfo();
     paths = new QStringList();
-    offset = new QSize(0, 0);
+    offset = new QPoint(0, 0);
     image = new QImage();
 
     QObject::connect(ui->imageButton, &QPushButton::clicked, this, &WallpaperSplitter::select_image);
@@ -65,7 +65,7 @@ void WallpaperSplitter::change_offset() {
         *offset = OffsetDialog::showOffsetDialog(this, *image);
     }
     ui->splitButton->setEnabled(true);
-    qDebug() << offset->width() << offset->height();
+    qDebug() << offset->x() << offset->y();
 }
 
 void WallpaperSplitter::split_image() {
@@ -98,10 +98,10 @@ void WallpaperSplitter::split_image() {
         // copy a rectangle with size and position of the screen
         geometry = screen -> geometry();
         // add offset
-        geometry.setX(geometry.x() + offset -> width());
-        geometry.setY(geometry.y() + offset -> height());
-        geometry.setWidth(geometry.width() + offset -> width());
-        geometry.setHeight(geometry.height() + offset -> height());
+        geometry.setX(geometry.x() + offset -> x());
+        geometry.setY(geometry.y() + offset -> y());
+        geometry.setWidth(geometry.width() + offset -> x());
+        geometry.setHeight(geometry.height() + offset -> y());
         wallpaper = image -> copy(geometry);
 
         // images are saved in a subdirectory called split with a number as suffix

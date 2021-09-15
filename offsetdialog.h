@@ -20,9 +20,9 @@ Q_OBJECT
 public:
     explicit OffsetDialog(QImage &image, QWidget *parent = nullptr);
     ~OffsetDialog() override;
-    static QSize showOffsetDialog(QWidget *parent, QImage &image);
+    static QPoint showOffsetDialog(QWidget *parent, QImage &image);
 
-    QSize getOffset();
+    QPointF getOffset();
 
 private:
     Ui::OffsetDialog *ui;

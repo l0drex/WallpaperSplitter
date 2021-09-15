@@ -26,7 +26,7 @@ private:
     Ui::WallpaperSplitter *ui;
     QFileInfo *fileInfo;
     QImage *image;
-    QSize *offset;
+    QPoint *offset;
     const QList<QScreen*> screens = QApplication::screens();
     QStringList *paths;
 

@@ -57,8 +57,8 @@ void OffsetDialog::addScreens(QList<QScreen *> screens) {
     screenGroup->setFlag(QGraphicsItem::ItemIsMovable);
 }
 
-QSize OffsetDialog::getOffset() {
-    return {static_cast<int>(screenGroup->x()), static_cast<int>(screenGroup->y())};
+QPointF OffsetDialog::getOffset() {
+    return screenGroup->pos();
 }
 
 void OffsetDialog::showEvent(QShowEvent *event) {
@@ -77,11 +77,11 @@ void OffsetDialog::scaleView() {
                              Qt::AspectRatioMode::KeepAspectRatio);
 }
 
-QSize OffsetDialog::showOffsetDialog(QWidget *parent, QImage &image) {
+QPoint OffsetDialog::showOffsetDialog(QWidget *parent, QImage &image) {
     // set up the dialog
     const auto offsetDialog = new OffsetDialog(image, parent);
     offsetDialog -> exec();
 
     // the offset is the position of the screen rectangle element
-    return offsetDialog->getOffset();
+    return offsetDialog->getOffset().toPoint();
 }
