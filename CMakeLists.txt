@@ -14,7 +14,7 @@ find_package(Qt5 COMPONENTS
         REQUIRED)
 find_package(KF5ConfigWidgets)
 
-add_executable(wallpaper_splitter main.cpp offsetdialog.cpp offsetdialog.h offsetdialog.ui wallpapersplitter.cpp wallpapersplitter.h wallpapersplitter.ui)
+add_executable(wallpaper_splitter main.cpp wallpapersplitter.cpp wallpapersplitter.h wallpapersplitter.ui)
 target_link_libraries(wallpaper_splitter
         Qt5::Core
         Qt5::Gui

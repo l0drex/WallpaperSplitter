@@ -1,20 +1,18 @@
 //
-// Created by l0drex on 14.09.21.
+// Created by l0drex on 15.09.21.
 //
 
 #ifndef WALLPAPER_SPLITTER_WALLPAPERSPLITTER_H
 #define WALLPAPER_SPLITTER_WALLPAPERSPLITTER_H
 
-#include <QMainWindow>
-#include <QFileInfo>
-#include <QApplication>
+#include <QWidget>
 
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class WallpaperSplitter; }
 QT_END_NAMESPACE
 
-class WallpaperSplitter : public QMainWindow {
+class WallpaperSplitter : public QWidget {
 Q_OBJECT
 
 public:
@@ -24,19 +22,6 @@ public:
 
 private:
     Ui::WallpaperSplitter *ui;
-    QFileInfo *fileInfo;
-    QImage *image;
-    QPoint *offset;
-    const QList<QScreen*> screens = QApplication::screens();
-    QStringList *paths;
-
-    QSize getCombinedScreenSize();
-
-public slots:
-    void select_image();
-    void change_offset();
-    void split_image();
-    void apply_wallpapers();
 };
 
 
