@@ -27,6 +27,7 @@ public:
 private:
     Ui::OffsetDialog *ui;
     QGraphicsItemGroup *screenGroup{};
+    QRect *image_rect;
 
     void addImage(QImage &image);
     void addScreens(QList<QScreen *> screens);

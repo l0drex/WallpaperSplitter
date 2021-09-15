@@ -18,6 +18,7 @@ OffsetDialog::OffsetDialog(QImage &image, QWidget *parent) :
         QDialog(parent), ui(new Ui::OffsetDialog) {
     ui->setupUi(this);
     ui->imageView->setScene(new QGraphicsScene(this));
+    image_rect = new QRect(0, 0, 0, 0);
 
     addImage(image);
     addScreens(QApplication::screens());
@@ -35,6 +36,7 @@ void OffsetDialog::addImage(QImage &image) {
     pixmap->convertFromImage(image);
     const auto item = ui->imageView->scene()->addPixmap(*pixmap);
     item->setFlag(QGraphicsItem::ItemClipsChildrenToShape);  // FIXME group escapes somehow
+    *image_rect = image.rect();
 }
 
 void OffsetDialog::addScreens(QList<QScreen *> screens) {
@@ -72,9 +74,7 @@ void OffsetDialog::resizeEvent(QResizeEvent *event) {
 }
 
 void OffsetDialog::scaleView() {
-    // FIXME ensure that this is indeed the image and not something else
-    ui->imageView->fitInView(ui->imageView->scene()->items().first()->boundingRect(),
-                             Qt::AspectRatioMode::KeepAspectRatio);
+    ui->imageView->fitInView(*image_rect, Qt::AspectRatioMode::KeepAspectRatio);
 }
 
 QPoint OffsetDialog::showOffsetDialog(QWidget *parent, QImage &image) {
