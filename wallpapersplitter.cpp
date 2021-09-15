@@ -65,7 +65,8 @@ void WallpaperSplitter::change_offset() {
         *offset = OffsetDialog::showOffsetDialog(this, *image);
     }
     ui->splitButton->setEnabled(true);
-    qDebug() << offset->x() << offset->y();
+
+    qDebug() << "Offset of" << offset->x() << 'x' << offset->y() << "has been selected.";
 }
 
 void WallpaperSplitter::split_image() {
@@ -77,6 +78,8 @@ void WallpaperSplitter::split_image() {
      * @param image: The image that should be split.
      * @param fileInfo: The path to the image that should be split.
      */
+
+    paths->clear();
 
     // FIXME there might be a better way. Qt does not use exceptions
     if(!fileInfo->isFile()) {
@@ -114,14 +117,14 @@ void WallpaperSplitter::split_image() {
     });
 
     ui->applyButton->setEnabled(true);
+    qDebug() << "Image was split, pieces have been saved in" << directory;
 }
 
 void WallpaperSplitter::apply_wallpapers() {
-    // TODO
     QString script;
     QTextStream out(&script);
     assert(!paths->isEmpty());
-    qDebug() << paths->join("', '");
+    qDebug() << "Applying image" << paths->join(", ");
     // language=JavaScript
     out << "var paths = ['" + paths->join("', '") + "'];"
         << "var path_iterator = 0;"
