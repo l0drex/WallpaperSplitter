@@ -60,7 +60,7 @@ void WallpaperSplitter::change_offset() {
     const QSize screenSize = getCombinedScreenSize();
 
     if(image->height() > screenSize.height() || image->width() > screenSize.width()) {
-        offset = new QSize(OffsetDialog::getOffset(*image));
+        offset = new QSize(OffsetDialog::showOffsetDialog(*image));
     }
 }
 

@@ -17,16 +17,16 @@ class OffsetDialog : public QDialog {
 Q_OBJECT
 
 public:
-    explicit OffsetDialog(QWidget *parent = nullptr);
+    explicit OffsetDialog(QImage &image, QWidget *parent = nullptr);
     ~OffsetDialog() override;
     void done(int i) override;
-    void addImage(QImage &image);
-    static QSize getOffset(QImage &image);
+    static QSize showOffsetDialog(QImage &image);
 
 private:
     Ui::OffsetDialog *ui;
 
-    void addScreens(QList<QScreen *> &screens);
+    void addImage(QImage &image);
+    void addScreens(QList<QScreen *> screens);
     void scaleView();
 
 private slots:
