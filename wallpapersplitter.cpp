@@ -8,6 +8,8 @@
 #include <QStandardPaths>
 #include <QDebug>
 #include <QScreen>
+#include <QGraphicsItemGroup>
+#include <cmath>
 #include "wallpapersplitter.h"
 #include "ui_wallpapersplitter.h"
 #include "offsetdialog.h"
@@ -16,16 +18,19 @@
 WallpaperSplitter::WallpaperSplitter(QWidget *parent) :
         QMainWindow(parent), ui(new Ui::WallpaperSplitter) {
     ui->setupUi(this);
-    screens = QApplication::screens();
     fileInfo = new QFileInfo();
     paths = new QStringList();
+    offset = new QSize(0, 0);
+    image = new QImage();
+
     QObject::connect(ui->imageButton, &QPushButton::clicked, this, &WallpaperSplitter::select_image);
+    QObject::connect(ui->offsetButton, &QPushButton::clicked, this, &WallpaperSplitter::change_offset);
     QObject::connect(ui->splitButton, &QPushButton::clicked, this, &WallpaperSplitter::split_image);
     QObject::connect(ui->applyButton, &QPushButton::clicked, this, &WallpaperSplitter::apply_wallpapers);
 }
 
 void WallpaperSplitter::select_image() {
-    auto url = QFileDialog::getOpenFileUrl(
+    const auto url = QFileDialog::getOpenFileUrl(
             nullptr,
             "Select a wallpaper image",
             "file://" + QStandardPaths::writableLocation(QStandardPaths::PicturesLocation),
@@ -34,24 +39,29 @@ void WallpaperSplitter::select_image() {
     // if process was cancelled
     if(url.isEmpty()) QApplication::quit();
     fileInfo->setFile(url.path());
-}
+    image = new QImage(fileInfo->filePath());
 
-QSize WallpaperSplitter::change_offset(QImage &image) {
-    QSize offset = QSize(0, 0);
-    // NOTE maybe this has to be calculated over every screen
-    auto last_screen_geometry = screens.last() -> geometry();
-    int width = last_screen_geometry.x() + last_screen_geometry.width();
-    int height = last_screen_geometry.y() + last_screen_geometry.height();
-    if(image.height() > height || image.width() > width) {
-        offset = OffsetDialog::getOffset(image, screens);
-    } else {
-        if(image.height() < height || image.width() < width) {
-            // TODO scale the image
-            qDebug() << "Image is too small and has to be scaled";
-        }
+    // scale the image so that it fits
+    const QSize screenSize = getCombinedScreenSize();
+    // TODO improvement should be possible
+    if(image->width() < screenSize.width()){
+        qDebug() << "Image is too small and has to be scaled";
+        *image = image->scaledToWidth(screenSize.width(), Qt::TransformationMode::SmoothTransformation);
+    }
+    if(image->height() < screenSize.height()) {
+        qDebug() << "Image is too small and has to be scaled";
+        *image = image->scaledToHeight(screenSize.height(), Qt::TransformationMode::SmoothTransformation);
     }
 
-    return offset;
+    qDebug() << "Image" << fileInfo->fileName() << "selected.";
+}
+
+void WallpaperSplitter::change_offset() {
+    const QSize screenSize = getCombinedScreenSize();
+
+    if(image->height() > screenSize.height() || image->width() > screenSize.width()) {
+        offset = new QSize(OffsetDialog::getOffset(*image));
+    }
 }
 
 void WallpaperSplitter::split_image() {
@@ -69,33 +79,27 @@ void WallpaperSplitter::split_image() {
         qDebug() << "File does not exist!";
         return;
     }
-    auto image = new QImage(fileInfo->filePath());
     if(image -> isNull() || image -> sizeInBytes() < 0) {
         qDebug() << "Image is empty!";
         return;
     }
 
-    // ask user about offset, if needed
-    auto offset = change_offset(*image);
-
     QImage wallpaper;
-    QString directory = fileInfo->absolutePath() + '/' + fileInfo->baseName() + "_split";
-    // QDir().mkdir(directory);
-    // list of the paths to return
-
-    // FIXME this is to prevent endless savings while debugging / coding
-    return;
+    const QString directory = fileInfo->absolutePath() + '/' + fileInfo->baseName() + "_split";
+    QDir().mkdir(directory);
+    QRect geometry;
+    QString fileName;
 
     std::for_each(screens.begin(), screens.end(), [&](const QScreen *screen){
         // copy a rectangle with size and position of the screen
-        auto geometry = screen -> geometry();
+        geometry = screen -> geometry();
         // add offset
-        geometry.setX(geometry.x() + offset.width());
-        geometry.setY(geometry.y() + offset.height());
+        geometry.setX(geometry.x() + offset -> width());
+        geometry.setY(geometry.y() + offset -> height());
         wallpaper = image -> copy(geometry);
 
         // images are saved in a subdirectory called split with a number as suffix
-        auto fileName = directory + '/' + screen->name() + '.' + fileInfo->suffix();
+        fileName = directory + '/' + screen->name() + '.' + fileInfo->suffix();
         paths->append(fileName);
 
         // if this returns false, the save failed and the assertion fails
@@ -106,6 +110,18 @@ void WallpaperSplitter::split_image() {
 
 void WallpaperSplitter::apply_wallpapers() {
     // TODO
+}
+
+QSize WallpaperSplitter::getCombinedScreenSize() {
+    // get combined height and width of all screens
+    auto *screensRect = new QGraphicsItemGroup();
+    std::for_each(screens.begin(), screens.end(), [&](const QScreen* item){
+        screensRect->addToGroup(new QGraphicsRectItem(item->geometry()));
+    });
+    int height = std::ceil(screensRect->boundingRect().height());
+    int width  = std::ceil(screensRect->boundingRect().width());
+
+    return {width, height};
 }
 
 WallpaperSplitter::~WallpaperSplitter() {

@@ -7,6 +7,7 @@
 
 #include <QMainWindow>
 #include <QFileInfo>
+#include <QApplication>
 
 
 QT_BEGIN_NAMESPACE
@@ -24,13 +25,16 @@ public:
 private:
     Ui::WallpaperSplitter *ui;
     QFileInfo *fileInfo;
-    QList<QScreen*> screens;
+    QImage *image;
+    QSize *offset;
+    const QList<QScreen*> screens = QApplication::screens();
     QStringList *paths;
 
-    QSize change_offset(QImage &image);
+    QSize getCombinedScreenSize();
 
 public slots:
     void select_image();
+    void change_offset();
     void split_image();
     void apply_wallpapers();
 };

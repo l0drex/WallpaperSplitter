@@ -49,12 +49,13 @@ void OffsetDialog::addScreens(QList<QScreen *> &screens) {
     });
 
     // darken the background around the screen rectangles
-    // TODO try the ItemDoesntPropagateOpacityToChildren flag
     auto backgroundColor = colorScheme.shade(KColorScheme::ShadeRole::DarkShade);
     backgroundColor.setAlpha(128);
     auto background = QPolygonF(ui->imageView->sceneRect());
     background = background.subtracted(group->childrenBoundingRect());
-    ui->imageView->scene()->addPolygon(background, QPen(QColor("transparent")), backgroundColor);
+    ui->imageView->scene()->addPolygon(background,
+                                       QPen(QColor("transparent")),
+                                       backgroundColor);
 
     // make the screen item movable by the user
     group->setAcceptedMouseButtons(Qt::MouseButton::LeftButton);
@@ -78,10 +79,13 @@ void OffsetDialog::done(int i) {
 
 void OffsetDialog::scaleView() {
     // FIXME ensure that this is indeed the image and not something else
-    ui->imageView->fitInView(ui->imageView->scene()->items().first()->boundingRect(), Qt::AspectRatioMode::KeepAspectRatio);
+    ui->imageView->fitInView(ui->imageView->scene()->items().first()->boundingRect(),
+                             Qt::AspectRatioMode::KeepAspectRatio);
 }
 
-QSize OffsetDialog::getOffset(QImage &image, QList<QScreen *> &screens) {
+QSize OffsetDialog::getOffset(QImage &image) {
+    QList<QScreen*> screens = QApplication::screens();
+
     // set up the dialog
     auto offsetDialog = new OffsetDialog();
     offsetDialog -> addImage(image);

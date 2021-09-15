@@ -23,6 +23,13 @@
      </widget>
     </item>
     <item>
+     <widget class="QPushButton" name="offsetButton">
+      <property name="text">
+       <string>Adjust offset</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QPushButton" name="splitButton">
       <property name="text">
        <string>Split the image</string>
