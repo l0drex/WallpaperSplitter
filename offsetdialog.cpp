@@ -44,25 +44,29 @@ void OffsetDialog::addScreens(QList<QScreen *> screens) {
     // draw a rectangle for every screen
     // all rectangles are in a group that is a child of the image, so that they clip to the borders
     const auto image = ui->imageView->scene()->items().first();
-    const auto group = new QGraphicsItemGroup(image);
+    screenGroup = new QGraphicsItemGroup(image);
     const auto pen = QPen(colorScheme.foreground(), 2);
     std::for_each(screens.begin(), screens.end(), [&](const QScreen* screen){
         const auto rect = ui->imageView->scene()->addRect(screen->geometry(), pen);
-        group -> addToGroup(rect);
+        screenGroup -> addToGroup(rect);
     });
 
     // darken the background around the screen rectangles
     auto backgroundColor = colorScheme.shade(KColorScheme::ShadeRole::DarkShade);
     backgroundColor.setAlpha(128);
     auto background = QPolygonF(ui->imageView->sceneRect());
-    background = background.subtracted(group->childrenBoundingRect());
+    background = background.subtracted(screenGroup->childrenBoundingRect());
     ui->imageView->scene()->addPolygon(background,
                                        QPen(QColor("transparent")),
                                        backgroundColor);
 
     // make the screen item movable by the user
-    group->setAcceptedMouseButtons(Qt::MouseButton::LeftButton);
-    group->setFlag(QGraphicsItem::ItemIsMovable);
+    screenGroup->setAcceptedMouseButtons(Qt::MouseButton::LeftButton);
+    screenGroup->setFlag(QGraphicsItem::ItemIsMovable);
+}
+
+QSize OffsetDialog::getOffset() {
+    return {static_cast<int>(screenGroup->x()), static_cast<int>(screenGroup->y())};
 }
 
 void OffsetDialog::showEvent(QShowEvent *event) {
@@ -75,24 +79,17 @@ void OffsetDialog::resizeEvent(QResizeEvent *event) {
     scaleView();
 }
 
-void OffsetDialog::done(int i) {
-    QDialog::done(i);
-    exit(0);
-}
-
 void OffsetDialog::scaleView() {
     // FIXME ensure that this is indeed the image and not something else
     ui->imageView->fitInView(ui->imageView->scene()->items().first()->boundingRect(),
                              Qt::AspectRatioMode::KeepAspectRatio);
 }
 
-QSize OffsetDialog::showOffsetDialog(QImage &image) {
+QSize OffsetDialog::showOffsetDialog(QWidget *parent, QImage &image) {
     // set up the dialog
-    const auto offsetDialog = new OffsetDialog(image);
+    const auto offsetDialog = new OffsetDialog(image, parent);
     offsetDialog -> exec();
 
     // the offset is the position of the screen rectangle element
-    auto screenRect = QRect();  // = offsetDialog->ui->imageView->findChild<QRect>("ScreenRect");
-    auto offset = QSize(screenRect.x(), screenRect.y());
-    return offset;
+    return offsetDialog->getOffset();
 }

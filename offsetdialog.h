@@ -7,6 +7,7 @@
 
 #include <QDialog>
 #include <QGraphicsScene>
+#include <QGraphicsItemGroup>
 
 
 QT_BEGIN_NAMESPACE
@@ -19,11 +20,13 @@ Q_OBJECT
 public:
     explicit OffsetDialog(QImage &image, QWidget *parent = nullptr);
     ~OffsetDialog() override;
-    void done(int i) override;
-    static QSize showOffsetDialog(QImage &image);
+    static QSize showOffsetDialog(QWidget *parent, QImage &image);
+
+    QSize getOffset();
 
 private:
     Ui::OffsetDialog *ui;
+    QGraphicsItemGroup *screenGroup{};
 
     void addImage(QImage &image);
     void addScreens(QList<QScreen *> screens);

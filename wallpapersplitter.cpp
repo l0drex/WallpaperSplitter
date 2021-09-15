@@ -31,7 +31,7 @@ WallpaperSplitter::WallpaperSplitter(QWidget *parent) :
 
 void WallpaperSplitter::select_image() {
     const auto url = QFileDialog::getOpenFileUrl(
-            nullptr,
+            this,
             "Select a wallpaper image",
             "file://" + QStandardPaths::writableLocation(QStandardPaths::PicturesLocation),
             QString("image")
@@ -60,8 +60,9 @@ void WallpaperSplitter::change_offset() {
     const QSize screenSize = getCombinedScreenSize();
 
     if(image->height() > screenSize.height() || image->width() > screenSize.width()) {
-        offset = new QSize(OffsetDialog::showOffsetDialog(*image));
+        *offset = OffsetDialog::showOffsetDialog(this, *image);
     }
+    qDebug() << offset->width() << offset->height();
 }
 
 void WallpaperSplitter::split_image() {
