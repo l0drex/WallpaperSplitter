@@ -54,7 +54,7 @@ void WallpaperSplitter::select_image() {
         qDebug() << "Image is too small and has to be scaled";
         *image = image->scaledToHeight(screenSize.height(), Qt::TransformationMode::SmoothTransformation);
     }
-
+    ui->offsetButton->setEnabled(true);
     qDebug() << "Image" << fileInfo->fileName() << "selected.";
 }
 
@@ -64,6 +64,7 @@ void WallpaperSplitter::change_offset() {
     if(image->height() > screenSize.height() || image->width() > screenSize.width()) {
         *offset = OffsetDialog::showOffsetDialog(this, *image);
     }
+    ui->splitButton->setEnabled(true);
     qDebug() << offset->width() << offset->height();
 }
 
@@ -111,6 +112,8 @@ void WallpaperSplitter::split_image() {
         bool success = wallpaper.save(fileName);
         assert(success);
     });
+
+    ui->applyButton->setEnabled(true);
 }
 
 void WallpaperSplitter::apply_wallpapers() {
@@ -119,6 +122,7 @@ void WallpaperSplitter::apply_wallpapers() {
     QTextStream out(&script);
     assert(!paths->isEmpty());
     qDebug() << paths->join("', '");
+    // FIXME this script is not reliable
     // language=JavaScript
     out << "var paths = ['" + paths->join("', '") + "'];"
         << "var path_iterator = 0;"
