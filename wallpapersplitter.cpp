@@ -13,6 +13,8 @@
 #include "wallpapersplitter.h"
 #include "ui_wallpapersplitter.h"
 #include "offsetdialog.h"
+#include <QDBusMessage>
+#include <QDBusConnection>
 
 
 WallpaperSplitter::WallpaperSplitter(QWidget *parent) :
@@ -113,6 +115,32 @@ void WallpaperSplitter::split_image() {
 
 void WallpaperSplitter::apply_wallpapers() {
     // TODO
+    QString script;
+    QTextStream out(&script);
+    assert(!paths->isEmpty());
+    qDebug() << paths->join("', '");
+    // language=JavaScript
+    out << "var paths = ['" + paths->join("', '") + "'];"
+        << "var path_iterator = 0;"
+        << "var activity = currentActivity();"
+        << "for(var key in desktopsForActivity(activity)) {"
+        << "    var d = desktopsForActivity(activity)[key];"
+        << "    d.wallpaperPlugin = 'org.kde.image';"
+        << "    d.currentConfigGroup = ['Wallpaper', 'org.kde.image', 'General'];"
+        << "    if(key > 0) {"
+        << "        d.writeConfig('Image', paths[path_iterator]);"
+        << "        path_iterator++;"
+        << "}}";
+    auto message = QDBusMessage::createMethodCall(
+            "org.kde.plasmashell",
+            "/PlasmaShell", "org.kde.PlasmaShell",
+            "evaluateScript");
+    message.setArguments(QVariantList() << QVariant(script));
+    auto reply = QDBusConnection::sessionBus().call(message);
+    if(reply.type() == QDBusMessage::ErrorMessage) {
+        qDebug() << "Something went wrong.";
+        qDebug() << reply.errorMessage();
+    }
 }
 
 QSize WallpaperSplitter::getCombinedScreenSize() {

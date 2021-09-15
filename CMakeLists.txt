@@ -19,5 +19,6 @@ target_link_libraries(wallpaper_splitter
         Qt5::Core
         Qt5::Gui
         Qt5::Widgets
+        Qt::DBus
         KF5::ConfigWidgets
         )
