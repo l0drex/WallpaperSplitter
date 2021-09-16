@@ -41,6 +41,12 @@ WallpaperSplitter::~WallpaperSplitter() {
 }
 
 void WallpaperSplitter::select_image() {
+    /**
+     * Opens a dialog that asks the user to select an image.
+     *
+     * Then sets the file info and image attribute, displays the image and calls add_screens().
+     * The image will be scaled to fit on all screens, also the graphics view will be scaled to show the whole image.
+     */
     const auto url = QFileDialog::getOpenFileUrl(
             this,
             "Select a wallpaper image",
@@ -66,7 +72,8 @@ void WallpaperSplitter::select_image() {
     }
 
     ui->graphicsView->scene()->clear();
-    ui->graphicsView->scene()->addPixmap(QPixmap::fromImage(*image));
+    auto image_item = ui->graphicsView->scene()->addPixmap(QPixmap::fromImage(*image));
+    image_item->setFlag(QGraphicsItem::ItemClipsChildrenToShape);  // FIXME does not what I thought it does
     scaleView();
     add_screens();
 
@@ -74,6 +81,9 @@ void WallpaperSplitter::select_image() {
 }
 
 inline QPoint WallpaperSplitter::get_offset() {
+    /**
+     * Returns the offset of the screen rectangles
+     */
     return screen_group->pos().toPoint();
 }
 
@@ -87,6 +97,9 @@ void WallpaperSplitter::scaleView() {
 }
 
 QStringList WallpaperSplitter::split_image(QString &path) {
+    /**
+     * Splits the previously selected image and returns a list to all paths where the images were saved.
+     */
     // FIXME there might be a better way. Qt does not use exceptions
     if(!image_file->isFile()) {
         qDebug() << "No existing file selected!";
@@ -128,6 +141,9 @@ QStringList WallpaperSplitter::split_image(QString &path) {
 }
 
 void WallpaperSplitter::apply_wallpaper() {
+    /**
+     * Applies the selected image to all screens in the current activity.
+     */
     // use a temporary directory
     QString temp_path = QDir::tempPath();
     auto paths = split_image(temp_path);
@@ -163,12 +179,18 @@ void WallpaperSplitter::apply_wallpaper() {
 }
 
 void WallpaperSplitter::save_wallpapers() {
+    /**
+     * Splits the image and saves the resulting wallpapers in a subdirectory
+     */
     QString path = image_file->absolutePath() + '/' + image_file->baseName() + "_split";
     split_image(path);
     qDebug() << "Image was split, pieces have been saved in" << path;
 }
 
 void WallpaperSplitter::add_screens() {
+    /**
+     * Adds the screen rectangles to the graphics view
+     */
     auto screens = QApplication::screens();
     // get the currently used color scheme
     const auto colorScheme = KColorScheme();
@@ -192,6 +214,9 @@ void WallpaperSplitter::add_screens() {
 }
 
 QSize WallpaperSplitter::total_screen_size() {
+    /**
+     * Calculates the total size of all screens combined.
+     */
     auto screens = QApplication::screens();
     // get combined height and width of all screens
     auto *screensRect = new QGraphicsItemGroup();
