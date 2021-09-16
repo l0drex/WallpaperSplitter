@@ -37,10 +37,6 @@ WallpaperSplitter::WallpaperSplitter(QWidget *parent) :
             this, &QDialog::reject);
 }
 
-WallpaperSplitter::~WallpaperSplitter() {
-    delete ui;
-}
-
 void WallpaperSplitter::select_image() {
     /**
      * Opens a dialog that asks the user to select an image.
@@ -79,22 +75,6 @@ void WallpaperSplitter::select_image() {
     add_screens();
 
     qDebug() << "Image" << image_file->fileName() << "selected.";
-}
-
-inline QPoint WallpaperSplitter::get_offset() {
-    /**
-     * Returns the offset of the screen rectangles
-     */
-    return screen_group->pos().toPoint();
-}
-
-void WallpaperSplitter::resizeEvent(QResizeEvent *event) {
-    QDialog::resizeEvent(event);
-    scaleView();
-}
-
-void WallpaperSplitter::scaleView() {
-    ui->graphicsView->fitInView(image->rect(), Qt::AspectRatioMode::KeepAspectRatio);
 }
 
 QStringList WallpaperSplitter::split_image(QString &path) {
@@ -213,4 +193,24 @@ QSize WallpaperSplitter::total_screen_size() {
     int width  = std::ceil(screensRect->boundingRect().width());
 
     return {width, height};
+}
+
+inline QPoint WallpaperSplitter::get_offset() {
+    /**
+     * Returns the offset of the screen rectangles
+     */
+    return screen_group->pos().toPoint();
+}
+
+void WallpaperSplitter::resizeEvent(QResizeEvent *event) {
+    QDialog::resizeEvent(event);
+    scaleView();
+}
+
+void WallpaperSplitter::scaleView() {
+    ui->graphicsView->fitInView(image->rect(), Qt::AspectRatioMode::KeepAspectRatio);
+}
+
+WallpaperSplitter::~WallpaperSplitter() {
+    delete ui;
 }
