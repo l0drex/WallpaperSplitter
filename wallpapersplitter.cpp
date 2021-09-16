@@ -16,6 +16,7 @@
 #include <cmath>
 #include "wallpapersplitter.h"
 #include "ui_wallpapersplitter.h"
+#include "ScreensItem.h"
 
 
 WallpaperSplitter::WallpaperSplitter(QWidget *parent) :
@@ -193,26 +194,9 @@ void WallpaperSplitter::add_screens() {
     /**
      * Adds the screen rectangles to the graphics view
      */
-    auto screens = QApplication::screens();
-    // get the currently used color scheme
-    const auto colorScheme = KColorScheme();
-
-    // draw a rectangle for every screen
-    // all rectangles are in a group that is a child of the image, so that they clip to the borders
     const auto image_item = ui->graphicsView->scene()->items().first();
-    screen_group = new QGraphicsItemGroup(image_item);
-    const auto pen = QPen(colorScheme.foreground(KColorScheme::ForegroundRole::ActiveText), 2);
-    std::for_each(screens.begin(), screens.end(), [&](const QScreen* screen){
-        const auto rect = ui->graphicsView->scene()->addRect(
-                screen->geometry(), pen,
-                colorScheme.background(KColorScheme::BackgroundRole::ActiveBackground));
-        rect->setOpacity(0.5);
-        screen_group -> addToGroup(rect);
-    });
-
-    // make the screen item movable by the user
-    screen_group->setAcceptedMouseButtons(Qt::MouseButton::LeftButton);
-    screen_group->setFlag(QGraphicsItem::ItemIsMovable);
+    screen_group = new ScreensItem(image_item);
+    ui->graphicsView->scene()->addItem(screen_group);
 }
 
 QSize WallpaperSplitter::total_screen_size() {

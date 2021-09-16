@@ -8,6 +8,7 @@
 #include <QDialog>
 #include <QFileInfo>
 #include <QGraphicsItemGroup>
+#include "ScreensItem.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -23,7 +24,7 @@ public:
 
 private:
     Ui::WallpaperSplitter *ui;
-    QGraphicsItemGroup *screen_group{};
+    ScreensItem *screen_group{};
     QFileInfo *image_file;
     QImage *image;
 
