@@ -28,7 +28,7 @@ WallpaperSplitter::WallpaperSplitter(QWidget *parent) :
 
     connect(ui->buttonBoxOpen, &QDialogButtonBox::accepted,
             this, &WallpaperSplitter::select_image);
-    connect(ui->buttonBox->button(QDialogButtonBox::StandardButton::Apply), &QPushButton::pressed,
+    connect(ui->buttonBox->button(QDialogButtonBox::StandardButton::Ok), &QPushButton::pressed,
             this, &WallpaperSplitter::apply_wallpaper);
     connect(ui->buttonBox->button(QDialogButtonBox::StandardButton::Save), &QPushButton::pressed,
             this, &WallpaperSplitter::save_wallpapers);
@@ -176,6 +176,8 @@ void WallpaperSplitter::apply_wallpaper() {
         qDebug() << reply.errorMessage();
         QApplication::quit();
     }
+
+    QApplication::quit();
 }
 
 void WallpaperSplitter::save_wallpapers() {
