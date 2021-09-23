@@ -11,6 +11,11 @@
 class ScreensItem : public QGraphicsItemGroup {
 public:
     explicit ScreensItem(QGraphicsItem *parent);
+    void setPos(QPointF pos);
+private:
+protected:
+    void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+
 private:
     void addScreens();
 };
