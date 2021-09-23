@@ -12,6 +12,7 @@ Keep in mind that this only works with images, not with any fancy wallpaper engi
 - [x] Split a given image
 - [x] Apply the wallpaper from within the application
 - [x] Adjust position
+- [ ] Zooming into the scene and moving it around with the mouse wheel (scroll / click)
 - [ ] Adjust scale (WIP)
 - [ ] Add a command line tool so that no GUI is needed and the process can be automated by external scripts
 
@@ -20,6 +21,7 @@ Keep in mind that this only works with images, not with any fancy wallpaper engi
 
 1. Click the <kbd>📂 Open</kbd> button to open your image.
 2. Adjust the position of your screens with <kbd>left-click</kbd> and the size with <kbd>right-click</kbd>.
+   You can also zoom and move the scene around with your mouse wheel.
 3. Save the images that will be your wallpaper by clicking <kbd>💾 Save</kbd> or
    apply them directly by clicking <kbd>✔️ Ok</kbd>.
 
