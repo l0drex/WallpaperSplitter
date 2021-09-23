@@ -39,16 +39,9 @@ void ScreensItem::addScreens() {
 
 void ScreensItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
     // TODO implement resizing
-    if(false and event->buttons() == Qt::MouseButton::RightButton) {
+    if(event->buttons() == Qt::MouseButton::RightButton) {
         const auto posDelta = event->buttonDownPos(Qt::MouseButton::RightButton) - event->pos();
-        qreal scale = 0;
-        if(posDelta.x() >= posDelta.y()) {
-            scale = 1/posDelta.x();
-        } else {
-            scale = 1/posDelta.y();
-        }
-        qDebug() << scale;
-        setScale(scale);
+        setScale(posDelta);
     } else if (event->buttons() == Qt::MouseButton::LeftButton) {
         setPos(pos() -
                (event->buttonDownPos(Qt::MouseButton::LeftButton) - event->pos()));
@@ -57,15 +50,20 @@ void ScreensItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
     }
 }
 
+void ScreensItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
+    if(event->button() == Qt::MouseButton::RightButton) scalingMode = ScalingMode::none;
+    QGraphicsItem::mouseReleaseEvent(event);
+}
+
 void ScreensItem::setPos(QPointF pos) {
-    const double dx = (pos.x() + childrenBoundingRect().width()) - (parentItem()->x() + parentItem()->boundingRect().width());
+    const double dx = (pos.x() + boundingRect().width()) - (parentItem()->x() + parentItem()->boundingRect().width());
     if(pos.x() < parentItem()->x()) {
         pos = {parentItem()->x(), pos.y()};
     } else if(dx > 0) {
         pos = {pos.x() - dx, pos.y()};
     }
 
-    const double dy = (pos.y() + childrenBoundingRect().height()) - (parentItem()->y() + parentItem()->boundingRect().height());
+    const double dy = (pos.y() + boundingRect().height()) - (parentItem()->y() + parentItem()->boundingRect().height());
     if(pos.y() < parentItem()->y()) {
         pos = {pos.x(), parentItem()->y()};
     } else if(dy > 0) {
@@ -73,4 +71,34 @@ void ScreensItem::setPos(QPointF pos) {
     }
 
     QGraphicsItemGroup::setPos(pos);
+}
+
+void ScreensItem::setScale(QPointF posDelta) {
+    if(scalingMode == ScalingMode::none) {
+        if(posDelta == QPointF(0, 0)) return;
+        if(posDelta.x() == 0) scalingMode = ScalingMode::vertical;
+        else if(posDelta.y() == 0) scalingMode = ScalingMode::horizontal;
+        else {
+            const auto ratio = posDelta.x() / posDelta.y();
+            qDebug() << ratio;
+            if (ratio > 1.5) scalingMode = ScalingMode::horizontal;
+            else if (ratio < 0.5) scalingMode = ScalingMode::vertical;
+            else scalingMode = ScalingMode::diagonal;
+        }
+    }
+
+    switch(scalingMode) {
+        case vertical:
+            scale = 1 - posDelta.y()/childrenBoundingRect().height();
+            break;
+        case horizontal:
+            scale = 1 - posDelta.x()/childrenBoundingRect().width();
+            break;
+        case diagonal:
+            qDebug() << "diagonal";
+            break;
+    }
+    // FIXME what if it is now to big?
+    // FIXME bounding rectangle does not update
+    QGraphicsItem::setScale(scale);
 }
