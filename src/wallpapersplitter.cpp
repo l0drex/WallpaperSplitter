@@ -99,6 +99,7 @@ QStringList WallpaperSplitter::split_image(QString &path) {
     auto offset = get_offset();
     QDir().mkdir(path);
 
+    // TODO use screen rectangles directly so that the scale can be applied
     std::for_each(screens.begin(), screens.end(), [&](const QScreen *screen){
         // copy a rectangle with size and position of the screen
         geometry = screen -> geometry();
