@@ -17,7 +17,6 @@ ScreensItem::ScreensItem(QGraphicsItem *parent) : QGraphicsItemGroup(parent) {
     setAcceptedMouseButtons(Qt::MouseButton::LeftButton);
     setAcceptedMouseButtons(Qt::MouseButton::RightButton);
     setFlag(QGraphicsItem::ItemIsMovable);
-    setTransformOriginPoint(childrenBoundingRect().width() / 2, childrenBoundingRect().height() / 2);
 
     // calculate maximum scale
     qreal maxScaleWidth = parentItem()->boundingRect().width() / childrenBoundingRect().width();
@@ -108,9 +107,13 @@ void ScreensItem::setScale(const QSizeF delta) {
             break;
         default:
             qDebug() << "Scaling mode is not defined!";
-            return;
     }
     if(newScale > maxScale) newScale = maxScale;
-    // FIXME bounding rectangle does not update
+    prepareGeometryChange();
     QGraphicsItem::setScale(newScale);
+    setPos(pos());
+}
+
+QRectF ScreensItem::boundingRect() const {
+    return {pos(), childrenBoundingRect().size() * scale()};
 }
