@@ -89,10 +89,10 @@ void ScreensItem::setScale(QPointF posDelta) {
 
     switch(scalingMode) {
         case vertical:
-            scale = 1 - posDelta.y()/childrenBoundingRect().height();
+            scale *= 1 - posDelta.y()/childrenBoundingRect().height();
             break;
         case horizontal:
-            scale = 1 - posDelta.x()/childrenBoundingRect().width();
+            scale *= 1 - posDelta.x()/childrenBoundingRect().width();
             break;
         case diagonal:
             qDebug() << "diagonal";
