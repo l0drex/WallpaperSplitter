@@ -31,7 +31,6 @@ private:
     QPoint get_offset();
     void scaleView();
     QStringList split_image(QString &path);
-    void add_screens();
     static QSize total_screen_size();
 
 private slots:

@@ -12,7 +12,6 @@
 #include <QDBusMessage>
 #include <QDBusConnection>
 #include <QPushButton>
-#include <KColorScheme>
 #include <cmath>
 #include "wallpapersplitter.h"
 #include "ui_wallpapersplitter.h"
@@ -55,6 +54,7 @@ void WallpaperSplitter::select_image() {
 
     image_file = new QFileInfo(url.path());
     image = new QImage(image_file->filePath());
+    qDebug() << "Image" << image_file->fileName() << "selected.";
 
     // scale the image so that it fits
     const auto screenSize = total_screen_size();
@@ -70,11 +70,8 @@ void WallpaperSplitter::select_image() {
 
     ui->graphicsView->scene()->clear();
     auto image_item = ui->graphicsView->scene()->addPixmap(QPixmap::fromImage(*image));
-    image_item->setFlag(QGraphicsItem::ItemClipsChildrenToShape);  // FIXME does not what I thought it does
+    screen_group = new ScreensItem(image_item);
     scaleView();
-    add_screens();
-
-    qDebug() << "Image" << image_file->fileName() << "selected.";
 }
 
 QStringList WallpaperSplitter::split_image(QString &path) {
@@ -169,15 +166,6 @@ void WallpaperSplitter::save_wallpapers() {
     QString path = image_file->absolutePath() + '/' + image_file->baseName() + "_split";
     split_image(path);
     qDebug() << "Image was split, pieces have been saved in" << path;
-}
-
-void WallpaperSplitter::add_screens() {
-    /**
-     * Adds the screen rectangles to the graphics view
-     */
-    const auto image_item = ui->graphicsView->scene()->items().first();
-    screen_group = new ScreensItem(image_item);
-    ui->graphicsView->scene()->addItem(screen_group);
 }
 
 QSize WallpaperSplitter::total_screen_size() {
