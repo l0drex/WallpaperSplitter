@@ -15,6 +15,8 @@ public:
     explicit ScreensItem(QGraphicsItem *parent);
     void setPos(QPointF pos);
     void setScale(QSizeF delta);
+    QRectF boundingRect() const override;
+
 private:
     ScalingMode scalingMode = ScalingMode::none;
     qreal maxScale;
