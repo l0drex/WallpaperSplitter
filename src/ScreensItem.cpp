@@ -17,7 +17,6 @@ ScreensItem::ScreensItem(QGraphicsItem *parent) : QGraphicsItemGroup(parent) {
     setAcceptedMouseButtons(Qt::MouseButton::LeftButton);
     setAcceptedMouseButtons(Qt::MouseButton::RightButton);
     setFlag(QGraphicsItem::ItemIsMovable);
-    setTransformOriginPoint(childrenBoundingRect().width() / 2, childrenBoundingRect().height() / 2);
 }
 
 void ScreensItem::addScreens() {
@@ -41,7 +40,7 @@ void ScreensItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
     // TODO implement resizing
     if(event->buttons() == Qt::MouseButton::RightButton) {
         const auto posDelta = event->buttonDownPos(Qt::MouseButton::RightButton) - event->pos();
-        setScale(posDelta);
+        setScale({posDelta.x(), posDelta.y()});
     } else if (event->buttons() == Qt::MouseButton::LeftButton) {
         setPos(pos() -
                (event->buttonDownPos(Qt::MouseButton::LeftButton) - event->pos()));
@@ -73,13 +72,14 @@ void ScreensItem::setPos(QPointF pos) {
     QGraphicsItemGroup::setPos(pos);
 }
 
-void ScreensItem::setScale(QPointF posDelta) {
+void ScreensItem::setScale(const QSizeF delta) {
     if(scalingMode == ScalingMode::none) {
-        if(posDelta == QPointF(0, 0)) return;
-        if(posDelta.x() == 0) scalingMode = ScalingMode::vertical;
-        else if(posDelta.y() == 0) scalingMode = ScalingMode::horizontal;
+        if(delta == QSizeF(0, 0)) return;
+        if(delta.width() == 0) scalingMode = ScalingMode::vertical;
+        else if(delta.height() == 0) scalingMode = ScalingMode::horizontal;
         else {
-            const auto ratio = posDelta.x() / posDelta.y();
+            // FIXME this code is never reached
+            const auto ratio = delta.width() / delta.height();
             qDebug() << ratio;
             if (ratio > 1.5) scalingMode = ScalingMode::horizontal;
             else if (ratio < 0.5) scalingMode = ScalingMode::vertical;
@@ -87,18 +87,26 @@ void ScreensItem::setScale(QPointF posDelta) {
         }
     }
 
+    auto previous_scale = scale();
     switch(scalingMode) {
         case vertical:
-            scale *= 1 - posDelta.y()/childrenBoundingRect().height();
+            previous_scale *= 1 - delta.height() / childrenBoundingRect().height();
             break;
         case horizontal:
-            scale *= 1 - posDelta.x()/childrenBoundingRect().width();
+            previous_scale *= 1 - delta.width() / childrenBoundingRect().width();
             break;
         case diagonal:
             qDebug() << "diagonal";
+            // TODO
             break;
+        default:
+            qDebug() << "Scaling mode is not defined!";
+            return;
     }
     // FIXME what if it is now to big?
     // FIXME bounding rectangle does not update
-    QGraphicsItem::setScale(scale);
+    // transform from the middle
+    setTransformOriginPoint(childrenBoundingRect().width() / 2, childrenBoundingRect().height() / 2);
+    QGraphicsItem::setScale(previous_scale);
+    setTransformOriginPoint(pos());
 }

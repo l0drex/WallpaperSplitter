@@ -14,18 +14,15 @@ class ScreensItem : public QGraphicsItemGroup {
 public:
     explicit ScreensItem(QGraphicsItem *parent);
     void setPos(QPointF pos);
-    void setScale(QPointF posDelta);
+    void setScale(QSizeF delta);
 private:
+    ScalingMode scalingMode = ScalingMode::none;
+
+    void addScreens();
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
 
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
-
-private:
-    ScalingMode scalingMode = ScalingMode::none;
-    qreal scale = 1;
-
-    void addScreens();
 };
 
 
