@@ -44,7 +44,7 @@ void ScreensItem::addScreens() {
 void ScreensItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
     if(event->buttons() == Qt::MouseButton::RightButton) {
         const auto posDelta = event->buttonDownPos(Qt::MouseButton::RightButton) - event->pos();
-        setScale({posDelta.x(), posDelta.y()});
+        setScale(posDelta);
     } else if (event->buttons() == Qt::MouseButton::LeftButton) {
         setPos(pos() -
                (event->buttonDownPos(Qt::MouseButton::LeftButton) - event->pos()));
@@ -76,14 +76,14 @@ void ScreensItem::setPos(QPointF pos) {
     QGraphicsItemGroup::setPos(pos);
 }
 
-void ScreensItem::setScale(const QSizeF delta) {
+void ScreensItem::setScale(const QPointF delta) {
     if(scalingMode == ScalingMode::none) {
-        if(delta == QSizeF(0, 0)) return;
-        if(delta.width() == 0) scalingMode = ScalingMode::vertical;
-        else if(delta.height() == 0) scalingMode = ScalingMode::horizontal;
+        if(delta == QPointF(0, 0)) return;
+        if(delta.x() == 0) scalingMode = ScalingMode::vertical;
+        else if(delta.y() == 0) scalingMode = ScalingMode::horizontal;
         else {
             // FIXME this code is never reached
-            const auto ratio = delta.width() / delta.height();
+            const auto ratio = delta.x() / delta.y();
             qDebug() << ratio;
             if (ratio > 1.5) scalingMode = ScalingMode::horizontal;
             else if (ratio < 0.5) scalingMode = ScalingMode::vertical;
@@ -95,10 +95,10 @@ void ScreensItem::setScale(const QSizeF delta) {
     auto newScale = previousScale;
     switch(scalingMode) {
         case vertical:
-            newScale *= 1 - delta.height() / boundingRect().height();
+            newScale *= 1 - delta.y() / boundingRect().height();
             break;
         case horizontal:
-            newScale *= 1 - delta.width() / boundingRect().width();
+            newScale *= 1 - delta.x() / boundingRect().width();
             break;
         case diagonal:
             qDebug() << "diagonal";

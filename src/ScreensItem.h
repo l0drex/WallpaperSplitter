@@ -14,7 +14,7 @@ class ScreensItem : public QGraphicsItemGroup {
 public:
     explicit ScreensItem(QGraphicsItem *parent);
     void setPos(QPointF pos);
-    void setScale(QSizeF delta);
+    void setScale(QPointF delta);
     QRectF boundingRect() const override;
 
 private:
