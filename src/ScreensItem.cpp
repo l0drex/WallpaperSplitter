@@ -61,16 +61,16 @@ void ScreensItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
 }
 
 void ScreensItem::setPos(QPointF pos) {
-    const double dx = (pos.x() + boundingRect().width()) - (parentItem()->x() + parentItem()->boundingRect().width());
-    if(pos.x() < parentItem()->x()) {
-        pos = {parentItem()->x(), pos.y()};
+    const double dx = (pos.x() + boundingRect().width()) - (parentItem()->boundingRect().width());
+    if(pos.x() < 0) {
+        pos = {0, pos.y()};
     } else if(dx > 0) {
         pos = {pos.x() - dx, pos.y()};
     }
 
-    const double dy = (pos.y() + boundingRect().height()) - (parentItem()->y() + parentItem()->boundingRect().height());
-    if(pos.y() < parentItem()->y()) {
-        pos = {pos.x(), parentItem()->y()};
+    const double dy = (pos.y() + boundingRect().height()) - (parentItem()->boundingRect().height());
+    if(pos.y() < 0) {
+        pos = {pos.x(), 0};
     } else if(dy > 0) {
         pos = {pos.x(), pos.y() - dy};
     }
