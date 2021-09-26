@@ -42,7 +42,6 @@ void ScreensItem::addScreens() {
 }
 
 void ScreensItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
-    // TODO implement resizing
     if(event->buttons() == Qt::MouseButton::RightButton) {
         const auto posDelta = event->buttonDownPos(Qt::MouseButton::RightButton) - event->pos();
         setScale({posDelta.x(), posDelta.y()});
