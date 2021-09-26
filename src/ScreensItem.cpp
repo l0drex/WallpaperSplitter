@@ -77,43 +77,48 @@ void ScreensItem::setPos(QPointF pos) {
 }
 
 void ScreensItem::setScale(const QPointF delta) {
+    // choose a scaling mode
     if(scalingMode == ScalingMode::none) {
-        if(delta == QPointF(0, 0)) return;
-        if(delta.x() == 0) scalingMode = ScalingMode::vertical;
+        if(delta == QPointF(0, 0) || delta.manhattanLength() < 100) return;
+        else if(delta.x() == 0) scalingMode = ScalingMode::vertical;
         else if(delta.y() == 0) scalingMode = ScalingMode::horizontal;
         else {
-            // FIXME this code is never reached
-            const auto ratio = delta.x() / delta.y();
-            qDebug() << ratio;
+            const auto ratio = abs(delta.x() / delta.y());
             if (ratio > 1.5) scalingMode = ScalingMode::horizontal;
             else if (ratio < 0.5) scalingMode = ScalingMode::vertical;
             else scalingMode = ScalingMode::diagonal;
         }
     }
 
-    const auto previousScale = scale();
-    auto newScale = previousScale;
+    // calculate scale
+    qreal newScale;
     switch(scalingMode) {
-        case vertical:
-            newScale *= 1 - delta.y() / boundingRect().height();
-            break;
         case horizontal:
-            newScale *= 1 - delta.x() / boundingRect().width();
+            newScale = 1 - delta.x() / childrenBoundingRect().width();
+            break;
+        case vertical:
+            newScale = 1 - delta.y() / childrenBoundingRect().height();
             break;
         case diagonal:
-            qDebug() << "diagonal";
-            // TODO
+            if(delta.y() < delta.x()) newScale = 1 - delta.x() / childrenBoundingRect().width();
+            else newScale = 1 - delta.y() / childrenBoundingRect().height();
             break;
         default:
+            // This should never happen
             qDebug() << "Scaling mode is not defined!";
+            return;
     }
-    if(newScale > maxScale) newScale = maxScale;
-    prepareGeometryChange();
-    QGraphicsItem::setScale(newScale);
+
+    // apply scale
+    if((newScale * scale()) > maxScale) QGraphicsItem::setScale(maxScale);
+    else {
+        prepareGeometryChange();
+        QGraphicsItem::setScale(newScale * scale());
+    }
     // move back into the view if necessary
     setPos(pos());
 }
 
 QRectF ScreensItem::boundingRect() const {
-    return {pos(), childrenBoundingRect().size() * scale()};
+    return {pos(), QGraphicsItemGroup::boundingRect().size() * scale()};
 }
