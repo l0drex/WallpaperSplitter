@@ -92,28 +92,24 @@ QStringList WallpaperSplitter::split_image(QString &path) {
     QRect geometry;
     QString fileName;
     QStringList paths{};
-    auto screens = QApplication::screens();
-    auto offset = get_offset();
+    const auto screens = screen_group->childItems();
     QDir().mkdir(path);
+    int index = 0;
 
-    // TODO use screen rectangles directly so that the scale can be applied
-    std::for_each(screens.begin(), screens.end(), [&](const QScreen *screen){
+    std::for_each(screens.begin(), screens.end(), [&](const QGraphicsItem *screen){
         // copy a rectangle with size and position of the screen
-        geometry = screen -> geometry();
-        // add offset
-        geometry.setX(geometry.x() + offset.x());
-        geometry.setY(geometry.y() + offset.y());
-        geometry.setWidth(geometry.width() + offset.x());
-        geometry.setHeight(geometry.height() + offset.y());
+        geometry = screen->boundingRect().toRect();
+        geometry = screen->mapRectToScene(geometry).toRect();
         wallpaper = image -> copy(geometry);
 
         // images are saved in a subdirectory called split with a number as suffix
-        fileName = path + '/' + screen->name() + '.' + image_file->suffix();
+        fileName = path + '/' + QString::number(index) + '.' + image_file->suffix();
         paths.append(fileName);
 
         // if this returns false, the save failed and the assertion fails
         bool success = wallpaper.save(fileName);
         assert(success);
+        index++;
     });
 
     return paths;
@@ -182,13 +178,6 @@ QSize WallpaperSplitter::total_screen_size() {
     int width  = std::ceil(screensRect->boundingRect().width());
 
     return {width, height};
-}
-
-inline QPoint WallpaperSplitter::get_offset() {
-    /**
-     * Returns the offset of the screen rectangles
-     */
-    return screen_group->pos().toPoint();
 }
 
 void WallpaperSplitter::resizeEvent(QResizeEvent *event) {

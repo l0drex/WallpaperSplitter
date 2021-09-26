@@ -28,7 +28,6 @@ private:
     QFileInfo *image_file;
     QImage *image;
 
-    QPoint get_offset();
     void scaleView();
     QStringList split_image(QString &path);
     static QSize total_screen_size();
