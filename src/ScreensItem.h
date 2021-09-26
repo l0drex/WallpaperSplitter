@@ -17,11 +17,12 @@ public:
     void setScale(QSizeF delta);
 private:
     ScalingMode scalingMode = ScalingMode::none;
+    qreal maxScale;
 
     void addScreens();
+
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
-
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 };
 

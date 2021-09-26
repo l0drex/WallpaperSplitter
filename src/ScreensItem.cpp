@@ -17,6 +17,12 @@ ScreensItem::ScreensItem(QGraphicsItem *parent) : QGraphicsItemGroup(parent) {
     setAcceptedMouseButtons(Qt::MouseButton::LeftButton);
     setAcceptedMouseButtons(Qt::MouseButton::RightButton);
     setFlag(QGraphicsItem::ItemIsMovable);
+    setTransformOriginPoint(childrenBoundingRect().width() / 2, childrenBoundingRect().height() / 2);
+
+    // calculate maximum scale
+    qreal maxScaleWidth = parentItem()->boundingRect().width() / childrenBoundingRect().width();
+    qreal maxScaleHeight = parentItem()->boundingRect().height() / childrenBoundingRect().height();
+    maxScale = std::min(maxScaleHeight, maxScaleWidth);
 }
 
 void ScreensItem::addScreens() {
@@ -87,13 +93,14 @@ void ScreensItem::setScale(const QSizeF delta) {
         }
     }
 
-    auto previous_scale = scale();
+    const auto previousScale = scale();
+    auto newScale = previousScale;
     switch(scalingMode) {
         case vertical:
-            previous_scale *= 1 - delta.height() / childrenBoundingRect().height();
+            newScale *= 1 - delta.height() / boundingRect().height();
             break;
         case horizontal:
-            previous_scale *= 1 - delta.width() / childrenBoundingRect().width();
+            newScale *= 1 - delta.width() / boundingRect().width();
             break;
         case diagonal:
             qDebug() << "diagonal";
@@ -103,10 +110,7 @@ void ScreensItem::setScale(const QSizeF delta) {
             qDebug() << "Scaling mode is not defined!";
             return;
     }
-    // FIXME what if it is now to big?
+    if(newScale > maxScale) newScale = maxScale;
     // FIXME bounding rectangle does not update
-    // transform from the middle
-    setTransformOriginPoint(childrenBoundingRect().width() / 2, childrenBoundingRect().height() / 2);
-    QGraphicsItem::setScale(previous_scale);
-    setTransformOriginPoint(pos());
+    QGraphicsItem::setScale(newScale);
 }
