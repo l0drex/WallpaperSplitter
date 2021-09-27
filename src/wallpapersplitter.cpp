@@ -70,6 +70,7 @@ void WallpaperSplitter::select_image() {
 
     ui->graphicsView->scene()->clear();
     auto image_item = ui->graphicsView->scene()->addPixmap(QPixmap::fromImage(*image));
+    image_item->setFlag(QGraphicsItem::ItemContainsChildrenInShape);
     screen_group = new ScreensItem(image_item);
     scaleView();
 }

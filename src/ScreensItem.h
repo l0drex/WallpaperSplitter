@@ -13,9 +13,6 @@ enum ScalingMode {none, vertical, horizontal, diagonal};
 class ScreensItem : public QGraphicsItemGroup {
 public:
     explicit ScreensItem(QGraphicsItem *parent);
-    void setPos(QPointF pos);
-    void setScale(QPointF delta);
-    QRectF boundingRect() const override;
 
 private:
     ScalingMode scalingMode = ScalingMode::none;
@@ -26,6 +23,8 @@ private:
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+
+    QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 };
 
 
