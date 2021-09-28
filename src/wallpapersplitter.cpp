@@ -58,14 +58,8 @@ void WallpaperSplitter::select_image() {
 
     // scale the image so that it fits
     const auto screenSize = total_screen_size();
-    // TODO improvement should be possible
-    if(image->width() < screenSize.width()){
-        qDebug() << "Image is too small and has to be scaled";
-        *image = image->scaledToWidth(screenSize.width(), Qt::TransformationMode::SmoothTransformation);
-    }
-    if(image->height() < screenSize.height()) {
-        qDebug() << "Image is too small and has to be scaled";
-        *image = image->scaledToHeight(screenSize.height(), Qt::TransformationMode::SmoothTransformation);
+    if(image->width() < screenSize.width() || image->height() < screenSize.height()){
+        *image = image->scaled(screenSize, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
     }
 
     ui->graphicsView->scene()->clear();
@@ -79,14 +73,10 @@ QStringList WallpaperSplitter::split_image(QString &path) {
     /**
      * Splits the previously selected image and returns a list to all paths where the images were saved.
      */
-    // FIXME there might be a better way. Qt does not use exceptions
-    if(!image_file->isFile()) {
-        qDebug() << "No existing file selected!";
-        return {};
-    }
-    if(image -> isNull() || image -> sizeInBytes() < 0) {
+
+    if(!image_file->isFile() || image -> isNull() || image -> sizeInBytes() < 0) {
         qDebug() << "Image was not loaded correctly!";
-        QApplication::quit();
+        return {};
     }
 
     setCursor(Qt::WaitCursor);
