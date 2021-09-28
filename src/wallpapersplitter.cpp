@@ -89,6 +89,7 @@ QStringList WallpaperSplitter::split_image(QString &path) {
         QApplication::quit();
     }
 
+    setCursor(Qt::WaitCursor);
     QImage wallpaper;
     QRect geometry;
     QString fileName;
@@ -113,6 +114,7 @@ QStringList WallpaperSplitter::split_image(QString &path) {
         index++;
     });
 
+    unsetCursor();
     return paths;
 }
 
