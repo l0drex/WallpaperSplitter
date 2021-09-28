@@ -45,7 +45,7 @@ void WallpaperSplitter::select_image() {
      */
     const auto url = QFileDialog::getOpenFileUrl(
             this,
-            "Select a wallpaper image",
+            tr("Select a wallpaper image"),
             "file://" + QStandardPaths::writableLocation(QStandardPaths::PicturesLocation),
             QString("image")
     );
