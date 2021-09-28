@@ -83,6 +83,7 @@ void ScreensItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
                 case diagonal:
                     // FIXME this is very buggy
                     newScale = mouseMovement.manhattanLength() / transformOriginPoint().manhattanLength();
+                    if (qAbs(newScale - scale()) > 1) return;
                     break;
 
                 default:
@@ -124,6 +125,7 @@ QVariant ScreensItem::itemChange(QGraphicsItem::GraphicsItemChange change, const
         case QGraphicsItem::ItemScaleChange: {
             qreal newScale = value.toDouble();
             if(newScale > maxScale) return maxScale;
+            if(newScale < 0.1) return 0.1;
 
             QPointF newPos = pos();
             QPointF newBottomRight = newPos + sceneBoundingRect().bottomRight();
