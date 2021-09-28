@@ -43,6 +43,24 @@ void ScreensItem::addScreens() {
     });
 }
 
+void ScreensItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
+    if(event->button() == Qt::RightButton) {
+        const auto pos = transformOriginPoint() - event->pos();
+        if (-.3 * sceneBoundingRect().height() < pos.y() && pos.y() < .3 * sceneBoundingRect().height()) {
+            setCursor(Qt::SizeHorCursor);
+            scalingMode = horizontal;
+        } else if (-.3 * sceneBoundingRect().width() < pos.x() && pos.x() < .3 * sceneBoundingRect().width()) {
+            setCursor(Qt::SizeVerCursor);
+            scalingMode = vertical;
+        } else {
+            scalingMode = diagonal;
+            if (pos.x() * pos.y() > 0) setCursor(Qt::SizeFDiagCursor);
+            else setCursor(Qt::SizeBDiagCursor);
+        }
+    }
+    QGraphicsItem::mousePressEvent(event);
+}
+
 void ScreensItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
     switch (event->buttons()) {
         case Qt::RightButton: {
@@ -68,22 +86,7 @@ void ScreensItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
                     break;
 
                 default:
-                    // scaling mode is not set
-                    if (mouseMovement.manhattanLength() < 100) return;
-                    const qreal ratio = qAbs(mouseMovement.x() / mouseMovement.y());
-                    const qreal diagonalRatio = qAbs(boundingRect().width() / boundingRect().height());
-                    const qreal tolerance = diagonalRatio / 2;
-                    if (ratio > diagonalRatio + tolerance) {
-                        setCursor(Qt::SizeHorCursor);
-                        scalingMode = horizontal;
-                    } else if (ratio < diagonalRatio - tolerance) {
-                        setCursor(Qt::SizeVerCursor);
-                        scalingMode = vertical;
-                    } else {
-                        scalingMode = diagonal;
-                        if (mouseStart.x() * mouseStart.y() > 0) setCursor(Qt::SizeFDiagCursor);
-                        else setCursor(Qt::SizeBDiagCursor);
-                    }
+                    qWarning() << "No scaling mode is set!";
                     return;
             }
             setScale(scale() * (1 - newScale));
@@ -91,6 +94,7 @@ void ScreensItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
         }
         case Qt::LeftButton:
             setCursor(Qt::DragMoveCursor);
+            break;
     }
     QGraphicsItem::mouseMoveEvent(event);
 }
