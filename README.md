@@ -4,6 +4,7 @@ On KDE it is not possible to apply an image so that it spans across all of your 
 This tool fixes that by splitting your image according to your screen setup.
 It can also directly apply the image as your wallpaper.
 ![img.png](docs/img.png)
+
 Keep in mind that this only works with images, not with any fancy wallpaper engine or even dynamic wallpapers.
 
 
