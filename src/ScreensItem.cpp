@@ -18,6 +18,7 @@ ScreensItem::ScreensItem(QGraphicsItem *parent) : QGraphicsItemGroup(parent) {
     setAcceptedMouseButtons(Qt::RightButton);
     setFlag(ItemIsMovable);
     setFlag(ItemSendsGeometryChanges);
+    setTransformOriginPoint(sceneBoundingRect().center());
 
     // calculate maximum scale
     qreal maxScaleWidth = parentItem()->boundingRect().width() / childrenBoundingRect().width();
@@ -43,21 +44,53 @@ void ScreensItem::addScreens() {
 }
 
 void ScreensItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
-    if(event->buttons() == Qt::RightButton) {
-        auto posDelta = event->buttonDownPos(Qt::RightButton) - event->pos();
-        qreal newScale;
+    switch (event->buttons()) {
+        case Qt::RightButton: {
+            const auto mouseMovement = event->pos() - event->buttonDownPos(Qt::RightButton);
+            // this is a vector from the center of this item to the mouse movement start point
+            const auto mouseStart = event->buttonDownPos(Qt::RightButton) - transformOriginPoint();
 
-        if(posDelta.x() > posDelta.y()) {
-            setCursor(Qt::SizeHorCursor);
-            newScale = 1 - posDelta.x() / boundingRect().width();
-        } else {
-            setCursor(Qt::SizeVerCursor);
-            newScale = 1 - posDelta.y() / boundingRect().height();
+            qreal newScale;
+            switch (scalingMode) {
+                case horizontal:
+                    newScale = mouseMovement.x() / transformOriginPoint().x();
+                    if (mouseStart.x() > 0) newScale *= -1;
+                    break;
+
+                case vertical:
+                    newScale = mouseMovement.y() / transformOriginPoint().y();
+                    if (mouseStart.y() > 0) newScale *= -1;
+                    break;
+
+                case diagonal:
+                    // FIXME this is very buggy
+                    newScale = mouseMovement.manhattanLength() / transformOriginPoint().manhattanLength();
+                    break;
+
+                default:
+                    // scaling mode is not set
+                    if (mouseMovement.manhattanLength() < 100) return;
+                    const qreal ratio = qAbs(mouseMovement.x() / mouseMovement.y());
+                    const qreal diagonalRatio = qAbs(boundingRect().width() / boundingRect().height());
+                    const qreal tolerance = diagonalRatio / 2;
+                    if (ratio > diagonalRatio + tolerance) {
+                        setCursor(Qt::SizeHorCursor);
+                        scalingMode = horizontal;
+                    } else if (ratio < diagonalRatio - tolerance) {
+                        setCursor(Qt::SizeVerCursor);
+                        scalingMode = vertical;
+                    } else {
+                        scalingMode = diagonal;
+                        if (mouseStart.x() * mouseStart.y() > 0) setCursor(Qt::SizeFDiagCursor);
+                        else setCursor(Qt::SizeBDiagCursor);
+                    }
+                    return;
+            }
+            setScale(scale() * (1 - newScale));
+            break;
         }
-
-        setScale(scale() * newScale);
-    } else if(event->buttons() == Qt::LeftButton) {
-        setCursor(Qt::DragMoveCursor);
+        case Qt::LeftButton:
+            setCursor(Qt::DragMoveCursor);
     }
     QGraphicsItem::mouseMoveEvent(event);
 }
@@ -69,29 +102,35 @@ void ScreensItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
 }
 
 QVariant ScreensItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value) {
-    if(change == ItemPositionChange && parentItem()) {
-        QPointF newPos = value.toPointF();
-        QPointF newBottomRight = newPos + sceneBoundingRect().bottomRight();
-        QRectF rect = parentItem()->sceneBoundingRect();
-        if(!rect.contains(newPos) || !rect.contains(newBottomRight)) {
-            newPos.setX(qMin(rect.right() - sceneBoundingRect().width(), qMax(newPos.x(), rect.left())));
-            newPos.setY(qMin(rect.bottom() - sceneBoundingRect().height(), qMax(newPos.y(), rect.top())));
-            return newPos;
+    switch (change) {
+        case QGraphicsItem::ItemPositionChange: {
+            // Because of the changed transformation origin, there is a difference between the top left point
+            // of the item and the position. The difference is this delta vector.
+            const QPointF delta = sceneBoundingRect().topLeft() - pos();
+            QPointF newTopLeft = value.toPointF()  + delta;
+            const QPointF newBottomRight = newTopLeft + sceneBoundingRect().bottomLeft() + QPoint(1, 1);
+            QRectF rect = parentItem()->sceneBoundingRect();
+            if(!rect.contains(newTopLeft) || !rect.contains(newBottomRight)) {
+                newTopLeft.setX(qMin(qMax(rect.left(), newTopLeft.x()), rect.right() + 1 - sceneBoundingRect().width()));
+                newTopLeft.setY(qMin(qMax(rect.top(), newTopLeft.y()), rect.bottom() + 1 - sceneBoundingRect().height()));
+                return newTopLeft - delta;
+            }
+            break;
         }
-    } else if(change == ItemScaleChange && parentItem()) {
-        qreal newScale = value.toDouble();
-        if(newScale > maxScale) newScale = maxScale;
+        case QGraphicsItem::ItemScaleChange: {
+            qreal newScale = value.toDouble();
+            if(newScale > maxScale) return maxScale;
 
-        QPointF newPos = pos();
-        QPointF newBottomRight = newPos + sceneBoundingRect().bottomRight();
-        QRectF rect = parentItem()->sceneBoundingRect();
-        if(!rect.contains(newBottomRight)) {
-            newPos.setX(qMin(rect.right() - sceneBoundingRect().width(), qMax(newPos.x(), rect.left())));
-            newPos.setY(qMin(rect.bottom() - sceneBoundingRect().height(), qMax(newPos.y(), rect.top())));
-            setPos(newPos);
+            QPointF newPos = pos();
+            QPointF newBottomRight = newPos + sceneBoundingRect().bottomRight();
+            QRectF rect = parentItem()->sceneBoundingRect();
+            if(!rect.contains(newBottomRight)) {
+                newPos.setX(qMin(rect.right() - sceneBoundingRect().width(), qMax(newPos.x(), rect.left())));
+                newPos.setY(qMin(rect.bottom() - sceneBoundingRect().height(), qMax(newPos.y(), rect.top())));
+                setPos(newPos);
+            }
+            break;
         }
-
-        return newScale;
     }
 
     return QGraphicsItem::itemChange(change, value);
