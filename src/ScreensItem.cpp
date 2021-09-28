@@ -48,18 +48,23 @@ void ScreensItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
         qreal newScale;
 
         if(posDelta.x() > posDelta.y()) {
+            setCursor(Qt::SizeHorCursor);
             newScale = 1 - posDelta.x() / boundingRect().width();
         } else {
+            setCursor(Qt::SizeVerCursor);
             newScale = 1 - posDelta.y() / boundingRect().height();
         }
 
         setScale(scale() * newScale);
+    } else if(event->buttons() == Qt::LeftButton) {
+        setCursor(Qt::DragMoveCursor);
     }
     QGraphicsItem::mouseMoveEvent(event);
 }
 
 void ScreensItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
     if(event->button() == Qt::MouseButton::RightButton) scalingMode = ScalingMode::none;
+    unsetCursor();
     QGraphicsItem::mouseReleaseEvent(event);
 }
 
