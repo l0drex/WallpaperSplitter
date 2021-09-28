@@ -1,5 +1,4 @@
 #include <QApplication>
-#include "offsetdialog.h"
 #include "wallpapersplitter.h"
 
 int main(int argc, char *argv[]) {

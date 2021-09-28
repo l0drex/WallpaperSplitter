@@ -1,42 +1,44 @@
 //
-// Created by l0drex on 14.09.21.
+// Created by l0drex on 15.09.21.
 //
 
 #ifndef WALLPAPER_SPLITTER_WALLPAPERSPLITTER_H
 #define WALLPAPER_SPLITTER_WALLPAPERSPLITTER_H
 
-#include <QMainWindow>
+#include <QDialog>
 #include <QFileInfo>
-#include <QApplication>
+#include <QGraphicsItemGroup>
+#include "ScreensItem.h"
 
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class WallpaperSplitter; }
 QT_END_NAMESPACE
 
-class WallpaperSplitter : public QMainWindow {
+class WallpaperSplitter : public QDialog {
 Q_OBJECT
 
 public:
     explicit WallpaperSplitter(QWidget *parent = nullptr);
-
     ~WallpaperSplitter() override;
 
 private:
     Ui::WallpaperSplitter *ui;
-    QFileInfo *fileInfo;
+    ScreensItem *screen_group{};
+    QFileInfo *image_file;
     QImage *image;
-    QPoint *offset;
-    const QList<QScreen*> screens = QApplication::screens();
-    QStringList *paths;
 
-    QSize getCombinedScreenSize();
+    void scaleView();
+    QStringList split_image(QString &path);
+    static QSize total_screen_size();
 
-public slots:
+private slots:
     void select_image();
-    void change_offset();
-    void split_image();
-    void apply_wallpapers();
+    void apply_wallpaper();
+    void save_wallpapers();
+
+protected:
+    void resizeEvent(QResizeEvent *event) override;
 };
 
 
