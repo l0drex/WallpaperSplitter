@@ -125,12 +125,11 @@ void WallpaperSplitter::apply_wallpaper() {
     // use a temporary directory
     QString temp_path = QDir::tempPath();
     auto paths = split_image(temp_path);
+    assert(!paths.isEmpty());
 
     // apply the wallpapers via a dbus call
     QString script;
     QTextStream out(&script);
-    assert(!paths.isEmpty());
-    qDebug() << "Applying image" << paths.join(", ");
     // language=JavaScript
     out << "var paths = ['" + paths.join("', '") + "'];"
         << "var path_iterator = 0;"
@@ -148,11 +147,11 @@ void WallpaperSplitter::apply_wallpaper() {
             "/PlasmaShell", "org.kde.PlasmaShell",
             "evaluateScript");
     message.setArguments(QVariantList() << QVariant(script));
+    qDebug() << "Applying image" << paths.join(", ");
     auto reply = QDBusConnection::sessionBus().call(message);
     if(reply.type() == QDBusMessage::ErrorMessage) {
-        qDebug() << "Something went wrong.";
-        qDebug() << reply.errorMessage();
-        QApplication::quit();
+        qCritical() << "Something went wrong.";
+        qCritical() << reply.errorMessage();
     }
 
     QApplication::quit();
