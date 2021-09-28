@@ -45,7 +45,7 @@ void WallpaperSplitter::select_image() {
      */
     const auto url = QFileDialog::getOpenFileUrl(
             this,
-            "Select a wallpaper image",
+            tr("Select a wallpaper image"),
             "file://" + QStandardPaths::writableLocation(QStandardPaths::PicturesLocation),
             QString("image")
     );
@@ -58,14 +58,8 @@ void WallpaperSplitter::select_image() {
 
     // scale the image so that it fits
     const auto screenSize = total_screen_size();
-    // TODO improvement should be possible
-    if(image->width() < screenSize.width()){
-        qDebug() << "Image is too small and has to be scaled";
-        *image = image->scaledToWidth(screenSize.width(), Qt::TransformationMode::SmoothTransformation);
-    }
-    if(image->height() < screenSize.height()) {
-        qDebug() << "Image is too small and has to be scaled";
-        *image = image->scaledToHeight(screenSize.height(), Qt::TransformationMode::SmoothTransformation);
+    if(image->width() < screenSize.width() || image->height() < screenSize.height()){
+        *image = image->scaled(screenSize, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
     }
 
     ui->graphicsView->scene()->clear();
@@ -79,16 +73,13 @@ QStringList WallpaperSplitter::split_image(QString &path) {
     /**
      * Splits the previously selected image and returns a list to all paths where the images were saved.
      */
-    // FIXME there might be a better way. Qt does not use exceptions
-    if(!image_file->isFile()) {
-        qDebug() << "No existing file selected!";
+
+    if(!image_file->isFile() || image -> isNull() || image -> sizeInBytes() < 0) {
+        qDebug() << "Image was not loaded correctly!";
         return {};
     }
-    if(image -> isNull() || image -> sizeInBytes() < 0) {
-        qDebug() << "Image was not loaded correctly!";
-        QApplication::quit();
-    }
 
+    setCursor(Qt::WaitCursor);
     QImage wallpaper;
     QRect geometry;
     QString fileName;
@@ -113,6 +104,7 @@ QStringList WallpaperSplitter::split_image(QString &path) {
         index++;
     });
 
+    unsetCursor();
     return paths;
 }
 
@@ -123,12 +115,11 @@ void WallpaperSplitter::apply_wallpaper() {
     // use a temporary directory
     QString temp_path = QDir::tempPath();
     auto paths = split_image(temp_path);
+    assert(!paths.isEmpty());
 
     // apply the wallpapers via a dbus call
     QString script;
     QTextStream out(&script);
-    assert(!paths.isEmpty());
-    qDebug() << "Applying image" << paths.join(", ");
     // language=JavaScript
     out << "var paths = ['" + paths.join("', '") + "'];"
         << "var path_iterator = 0;"
@@ -146,11 +137,11 @@ void WallpaperSplitter::apply_wallpaper() {
             "/PlasmaShell", "org.kde.PlasmaShell",
             "evaluateScript");
     message.setArguments(QVariantList() << QVariant(script));
+    qDebug() << "Applying image" << paths.join(", ");
     auto reply = QDBusConnection::sessionBus().call(message);
     if(reply.type() == QDBusMessage::ErrorMessage) {
-        qDebug() << "Something went wrong.";
-        qDebug() << reply.errorMessage();
-        QApplication::quit();
+        qCritical() << "Something went wrong.";
+        qCritical() << reply.errorMessage();
     }
 
     QApplication::quit();

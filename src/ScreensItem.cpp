@@ -126,15 +126,7 @@ QVariant ScreensItem::itemChange(QGraphicsItem::GraphicsItemChange change, const
             qreal newScale = value.toDouble();
             if(newScale > maxScale) return maxScale;
             if(newScale < 0.1) return 0.1;
-
-            QPointF newPos = pos();
-            QPointF newBottomRight = newPos + sceneBoundingRect().bottomRight();
-            QRectF rect = parentItem()->sceneBoundingRect();
-            if(!rect.contains(newBottomRight)) {
-                newPos.setX(qMin(rect.right() - sceneBoundingRect().width(), qMax(newPos.x(), rect.left())));
-                newPos.setY(qMin(rect.bottom() - sceneBoundingRect().height(), qMax(newPos.y(), rect.top())));
-                setPos(newPos);
-            }
+            setPos(itemChange(ItemPositionChange, pos()).toPointF());
             break;
         }
     }
