@@ -106,6 +106,21 @@ QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile, const QLis
     return paths;
 }
 
+QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile, const QString &path) {
+    QList<QRect> screenGeometries{};
+    const auto screens = QApplication::screens();
+    std::for_each(screens.begin(), screens.end(), [&](const QScreen* screen){
+        screenGeometries.append(screen->geometry());
+    });
+
+    return splitImage(imageFile, screenGeometries, path);
+}
+
+QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile) {
+    const QString path = imageFile.absolutePath() + '/' + imageFile.baseName() + "_split";
+    return splitImage(imageFile, path);
+}
+
 QStringList WallpaperSplitter::splitImage(const QString &path) {
     setCursor(Qt::WaitCursor);
 
