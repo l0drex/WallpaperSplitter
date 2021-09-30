@@ -10,7 +10,13 @@ GraphicsView::GraphicsView(QWidget *parent) : QGraphicsView(parent) {
 }
 
 void GraphicsView::wheelEvent(QWheelEvent *event) {
-    // TODO zoom into scene
+    // 1 if zooming in, -1 if zooming out
+    const auto scaleUp = 2*(event->angleDelta().y() < 0) - 1;
+    const auto amount = 1 - ZOOM_AMOUNT * scaleUp;
+    scale(amount, amount);
+
+    // TODO zoom to mouse position
+    centerOn(event->position().toPoint());
     QGraphicsView::wheelEvent(event);
 }
 

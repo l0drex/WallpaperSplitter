@@ -8,6 +8,8 @@
 
 #include <QGraphicsView>
 
+static const qreal ZOOM_AMOUNT = .1;
+
 class GraphicsView : public QGraphicsView {
 public:
     explicit GraphicsView(QWidget *parent = nullptr);
