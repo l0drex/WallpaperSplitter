@@ -21,21 +21,23 @@ Q_OBJECT
 public:
     explicit WallpaperSplitter(QWidget *parent = nullptr);
     ~WallpaperSplitter() override;
+    static QStringList splitImage(const QFileInfo &imageFile, const QString &path, QPoint topLeft = {0, 0}, QPoint bottomRight = {0, 0});
+    static QStringList splitImage(const QFileInfo &imageFile, const QList<QRect> &screens, const QString &path);
+    static QStringList splitImage(const QFileInfo &imageFile, QPoint topLeft = {0, 0}, QPoint bottomRight = {0, 0});
 
 private:
     Ui::WallpaperSplitter *ui;
-    ScreensItem *screen_group{};
-    QFileInfo *image_file;
-    QImage *image;
+    ScreensItem *screenGroup{};
+    QFileInfo *imageFile;
 
     void scaleView();
-    QStringList split_image(QString &path);
-    static QSize total_screen_size();
+    QStringList splitImage(const QString &path);
+    static inline QSize totalScreenSize();
 
 private slots:
-    void select_image();
-    void apply_wallpaper();
-    void save_wallpapers();
+    void selectImage();
+    void applyWallpaper();
+    void saveWallpapers();
 
 protected:
     void resizeEvent(QResizeEvent *event) override;

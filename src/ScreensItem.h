@@ -14,8 +14,11 @@ class ScreensItem : public QGraphicsItemGroup {
 public:
     explicit ScreensItem(QGraphicsItem *parent);
 
+    const QList<QGraphicsRectItem *> &getRectangles() const;
+
 private:
     ScalingMode scalingMode = ScalingMode::none;
+    QList<QGraphicsRectItem*> rectangles{};
     qreal maxScale;
 
     void addScreens();
