@@ -40,7 +40,12 @@ void ScreensItem::addScreens() {
         rect->setBrush(colorScheme.background(KColorScheme::BackgroundRole::ActiveBackground));
         rect->setOpacity(0.5);
         addToGroup(rect);
+        rectangles.append(rect);
     });
+}
+
+const QList<QGraphicsRectItem *> &ScreensItem::getRectangles() const {
+    return rectangles;
 }
 
 void ScreensItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {

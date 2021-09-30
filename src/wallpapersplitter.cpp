@@ -12,7 +12,6 @@
 #include <QDBusMessage>
 #include <QDBusConnection>
 #include <QPushButton>
-#include <cmath>
 #include "wallpapersplitter.h"
 #include "ui_wallpapersplitter.h"
 #include "ScreensItem.h"
@@ -92,10 +91,10 @@ QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile, const QLis
 
     std::for_each(screens.begin(), screens.end(), [&](const QRect screen){
         if (!image->rect().contains(screen.topLeft())) {
-            qWarning("Image does not contain top left corner of the provided rectangle!");
+            qWarning("Image does not contain the top left corner of the provided rectangle!");
         }
-        if (!image->rect().contains(screen.bottomRight() + QPoint(1, 1))) {
-            qWarning("Image does not contain bottom left position of the provided rectangle!");
+        if (!image->rect().contains(screen.bottomRight())) {
+            qWarning("Image does not contain the bottom right position of the provided rectangle!");
         }
 
         // copy a rectangle with size and position of the screen
@@ -141,9 +140,9 @@ QStringList WallpaperSplitter::splitImage(const QString &path) {
     setCursor(Qt::WaitCursor);
 
     QList<QRect> screens = {};
-    const auto screenItems = screenGroup->childItems();
-    std::for_each(screenItems.begin(), screenItems.end(), [&](const QGraphicsItem *screen){
-        screens.append(screen->sceneBoundingRect().toRect());
+    const auto screenItems = screenGroup->getRectangles();
+    std::for_each(screenItems.begin(), screenItems.end(), [&](const QGraphicsRectItem *screen){
+        screens.append(screen->rect().toRect());
     });
 
     unsetCursor();
@@ -208,10 +207,9 @@ QSize WallpaperSplitter::totalScreenSize() {
     std::for_each(screens.begin(), screens.end(), [&](const QScreen* item){
         screensRect->addToGroup(new QGraphicsRectItem(item->geometry()));
     });
-    int height = std::ceil(screensRect->boundingRect().height());
-    int width  = std::ceil(screensRect->boundingRect().width());
 
-    return {width, height};
+    // subtract the width of the stroke
+    return screensRect->sceneBoundingRect().size().toSize() - QSize(1, 1);
 }
 
 void WallpaperSplitter::resizeEvent(QResizeEvent *event) {
