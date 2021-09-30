@@ -3,9 +3,11 @@
 //
 
 #include <QMouseEvent>
+#include <QMimeData>
 #include "graphicsview.h"
 
-GraphicsView::GraphicsView(QWidget *parent) : QGraphicsView(parent) {
+GraphicsView::GraphicsView(WallpaperSplitter *parent) : QGraphicsView(parent) {
+    this->parent = parent;
     setAcceptDrops(true);
 }
 
@@ -39,7 +41,23 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent *event) {
     QGraphicsView::mouseReleaseEvent(event);
 }
 
+void GraphicsView::dragEnterEvent(QDragEnterEvent *event) {
+    if (event->mimeData()->hasImage() || event->mimeData()->hasUrls())
+        event->acceptProposedAction();
+    QGraphicsView::dragEnterEvent(event);
+}
+
+void GraphicsView::dragMoveEvent(QDragMoveEvent *event) {
+    if (event->mimeData()->hasImage() || event->mimeData()->hasUrls())
+        return;
+    QGraphicsView::dragMoveEvent(event);
+}
+
 void GraphicsView::dropEvent(QDropEvent *event) {
-    // TODO accept drops of images and add them to the scene
+    if (event->mimeData()->hasImage()) {
+        auto image = QImage::fromData(event->mimeData()->imageData().toByteArray());
+        parent->addImage(image);
+    } else if (event->mimeData()->hasUrls())
+        parent->addImage(event->mimeData()->urls().first());
     QGraphicsView::dropEvent(event);
 }

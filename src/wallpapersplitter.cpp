@@ -54,24 +54,7 @@ void WallpaperSplitter::selectImage() {
             "file://" + QStandardPaths::writableLocation(QStandardPaths::PicturesLocation),
             QString("image")
     );
-    // if process was cancelled
-    if(url.isEmpty()) return;
-
-    imageFile = new QFileInfo(url.path());
-    auto image = new QImage(imageFile->filePath());
-    qDebug() << "Image" << imageFile->fileName() << "selected.";
-
-    // scale the image so that it fits
-    const auto screenSize = totalScreenSize();
-    if(image->width() < screenSize.width() || image->height() < screenSize.height()){
-        *image = image->scaled(screenSize, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
-    }
-
-    ui->graphicsView->scene()->clear();
-    auto imageItem = ui->graphicsView->scene()->addPixmap(QPixmap::fromImage(*image));
-    imageItem->setFlag(QGraphicsItem::ItemContainsChildrenInShape);
-    screenGroup = new ScreensItem(imageItem);
-    scaleView();
+    addImage(url);
 }
 
 /**
@@ -229,4 +212,27 @@ void WallpaperSplitter::scaleView() {
 
 WallpaperSplitter::~WallpaperSplitter() {
     delete ui;
+}
+
+void WallpaperSplitter::addImage(QImage &image) {
+    // scale the image so that it fits
+    const auto screenSize = totalScreenSize();
+    if(image.width() < screenSize.width() || image.height() < screenSize.height()){
+        image = image.scaled(screenSize, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+    }
+
+    ui->graphicsView->scene()->clear();
+    auto imageItem = ui->graphicsView->scene()->addPixmap(QPixmap::fromImage(image));
+    imageItem->setFlag(QGraphicsItem::ItemContainsChildrenInShape);
+    screenGroup = new ScreensItem(imageItem);
+    scaleView();
+}
+
+void WallpaperSplitter::addImage(const QUrl &url) {
+    if(url.isEmpty()) return;
+
+    imageFile = new QFileInfo(url.path());
+    auto image = new QImage(imageFile->filePath());
+    qDebug() << "Image" << imageFile->fileName() << "selected.";
+    addImage(*image);
 }

@@ -24,6 +24,8 @@ public:
     static QStringList splitImage(const QFileInfo &imageFile, const QString &path, QPoint topLeft = {0, 0}, QPoint bottomRight = {0, 0});
     static QStringList splitImage(const QFileInfo &imageFile, const QList<QRect> &screens, const QString &path);
     static QStringList splitImage(const QFileInfo &imageFile, QPoint topLeft = {0, 0}, QPoint bottomRight = {0, 0});
+    void addImage(QImage &image);
+    void addImage(const QUrl &url);
 
 private:
     Ui::WallpaperSplitter *ui;
