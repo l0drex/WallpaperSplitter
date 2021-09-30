@@ -35,13 +35,13 @@ WallpaperSplitter::WallpaperSplitter(QWidget *parent) :
             this, &QDialog::reject);
 }
 
+/**
+ * Opens a dialog that asks the user to select an image.
+ *
+ * Then sets the file info and image attribute, displays the image and calls addScreens().
+ * The image will be scaled to fit on all screens, also the graphics view will be scaled to show the whole image.
+ */
 void WallpaperSplitter::selectImage() {
-    /**
-     * Opens a dialog that asks the user to select an image.
-     *
-     * Then sets the file info and image attribute, displays the image and calls addScreens().
-     * The image will be scaled to fit on all screens, also the graphics view will be scaled to show the whole image.
-     */
     const auto url = QFileDialog::getOpenFileUrl(
             this,
             tr("Select a wallpaper image"),
@@ -68,11 +68,10 @@ void WallpaperSplitter::selectImage() {
     scaleView();
 }
 
+/**
+ * Splits the previously selected image and returns a list to all paths where the images were saved.
+ */
 QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile, const QList<QRect> &screens, const QString &path) {
-    /**
-     * Splits the previously selected image and returns a list to all paths where the images were saved.
-     */
-
     if (screens.isEmpty()) {
         qFatal("No area to cut out provided!");
     }
@@ -150,10 +149,10 @@ QStringList WallpaperSplitter::splitImage(const QString &path) {
     return WallpaperSplitter::splitImage(*imageFile, screens, path);
 }
 
+/**
+ * Applies the selected image to all screens in the current activity.
+ */
 void WallpaperSplitter::applyWallpaper() {
-    /**
-     * Applies the selected image to all screens in the current activity.
-     */
     // use a temporary directory
     QString tempPath = QDir::tempPath();
     auto paths = splitImage(tempPath);
@@ -189,19 +188,19 @@ void WallpaperSplitter::applyWallpaper() {
     QApplication::quit();
 }
 
+/**
+ * Splits the image and saves the resulting wallpapers in a subdirectory
+ */
 void WallpaperSplitter::saveWallpapers() {
-    /**
-     * Splits the image and saves the resulting wallpapers in a subdirectory
-     */
     QString path = imageFile->absolutePath() + '/' + imageFile->baseName() + "_split";
     splitImage(path);
     qDebug() << "Image was split, pieces have been saved in" << path;
 }
 
+/**
+ * Calculates the total size of all screens combined.
+ */
 QSize WallpaperSplitter::totalScreenSize() {
-    /**
-     * Calculates the total size of all screens combined.
-     */
     auto screens = QApplication::screens();
     // get combined height and width of all screens
     auto *screensRect = new QGraphicsItemGroup();
