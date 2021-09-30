@@ -21,6 +21,12 @@
 WallpaperSplitter::WallpaperSplitter(QWidget *parent) :
         QDialog(parent), ui(new Ui::WallpaperSplitter) {
     ui->setupUi(this);
+
+    // replace the standard graphics view with my subclass
+    auto graphicsView = new GraphicsView(this);
+    delete ui->verticalLayout->replaceWidget(ui->graphicsView, graphicsView)->widget();
+    ui->graphicsView = graphicsView;
+
     ui->graphicsView->setScene(new QGraphicsScene());
     ui->graphicsView->scene()->addText(tr("Press 'open' to select an image"));
     imageFile = new QFileInfo();
