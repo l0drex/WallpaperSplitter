@@ -73,14 +73,15 @@ QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile, const QLis
      * Splits the previously selected image and returns a list to all paths where the images were saved.
      */
 
+    if (screens.isEmpty()) {
+        qFatal("No area to cut out provided!");
+    }
     if(!imageFile.isFile()) {
         qFatal("Image was not loaded correctly!");
-        return {};
     }
     auto image = new QImage(imageFile.filePath());
     if (image->isNull() || image->sizeInBytes() < 0) {
         qFatal("Image could not be loaded");
-        return {};
     }
 
     QImage wallpaper;
@@ -90,6 +91,13 @@ QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile, const QLis
     int index = 0;
 
     std::for_each(screens.begin(), screens.end(), [&](const QRect screen){
+        if (!image->rect().contains(screen.topLeft())) {
+            qWarning("Image does not contain top left corner of the provided rectangle!");
+        }
+        if (!image->rect().contains(screen.bottomRight() + QPoint(1, 1))) {
+            qWarning("Image does not contain bottom left position of the provided rectangle!");
+        }
+
         // copy a rectangle with size and position of the screen
         wallpaper = image->copy(screen);
 
