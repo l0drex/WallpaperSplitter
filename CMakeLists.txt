@@ -14,7 +14,7 @@ find_package(Qt5 COMPONENTS
         REQUIRED)
 find_package(KF5ConfigWidgets)
 
-add_executable(wallpaper_splitter src/main.cpp src/wallpapersplitter.cpp src/wallpapersplitter.h src/wallpapersplitter.ui src/ScreensItem.cpp src/ScreensItem.h)
+add_executable(wallpaper_splitter src/main.cpp src/wallpapersplitter.cpp src/wallpapersplitter.h src/wallpapersplitter.ui src/screensitem.cpp src/screensitem.h)
 target_link_libraries(wallpaper_splitter
         Qt5::Core
         Qt5::Gui

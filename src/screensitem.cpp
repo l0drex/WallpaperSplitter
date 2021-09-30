@@ -8,7 +8,7 @@
 #include <QApplication>
 #include <QGraphicsSceneMouseEvent>
 #include <QDebug>
-#include "ScreensItem.h"
+#include "screensitem.h"
 
 ScreensItem::ScreensItem(QGraphicsItem *parent) : QGraphicsItemGroup(parent) {
     addScreens();

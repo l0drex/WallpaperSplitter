@@ -8,7 +8,7 @@
 #include <QDialog>
 #include <QFileInfo>
 #include <QGraphicsItemGroup>
-#include "ScreensItem.h"
+#include "screensitem.h"
 
 
 QT_BEGIN_NAMESPACE

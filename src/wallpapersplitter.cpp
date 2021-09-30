@@ -14,7 +14,8 @@
 #include <QPushButton>
 #include "wallpapersplitter.h"
 #include "ui_wallpapersplitter.h"
-#include "ScreensItem.h"
+#include "screensitem.h"
+#include "graphicsview.h"
 
 
 WallpaperSplitter::WallpaperSplitter(QWidget *parent) :
