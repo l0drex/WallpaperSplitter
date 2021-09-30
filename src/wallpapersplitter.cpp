@@ -114,19 +114,27 @@ QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile, const QLis
     return paths;
 }
 
-QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile, const QString &path) {
+QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile, const QString &path, const QPoint topLeft, const QPoint bottomRight) {
     QList<QRect> screenGeometries{};
     const auto screens = QApplication::screens();
     std::for_each(screens.begin(), screens.end(), [&](const QScreen* screen){
-        screenGeometries.append(screen->geometry());
+        // set top-left corner
+        QRect geometry = screen->geometry();
+        QPoint delta = screen->geometry().topLeft() - screens.first()->geometry().topLeft();
+        geometry.moveTopLeft(topLeft + delta);
+        // set bottom-right to desired position, if possible
+        if (bottomRight.manhattanLength() > 0) {
+            geometry.setSize(geometry.size().scaled(bottomRight.x(), bottomRight.y(), Qt::KeepAspectRatioByExpanding));
+        }
+        screenGeometries.append(geometry);
     });
 
     return splitImage(imageFile, screenGeometries, path);
 }
 
-QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile) {
+QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile, const QPoint topLeft, const QPoint bottomRight) {
     const QString path = imageFile.absolutePath() + '/' + imageFile.baseName() + "_split";
-    return splitImage(imageFile, path);
+    return splitImage(imageFile, path, topLeft, bottomRight);
 }
 
 QStringList WallpaperSplitter::splitImage(const QString &path) {
