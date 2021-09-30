@@ -10,13 +10,16 @@ Keep in mind that this only works with images, not with any fancy wallpaper engi
 
 ## 🚀 Features and roadmap
 
+This is only an oveeview. For a more in-depth look see the project tab. 
 - [x] Split a given image
 - [x] Apply the wallpaper from within the application
 - [x] Adjust position
-- [ ] Adjust scale (WIP)
+- [x] Adjust scale*
 - [ ] Zooming into the scene and moving it around with the mouse wheel (scroll / click)
-- [ ] Add a command line tool so that no GUI is needed and the process can be automated by external scripts
+- [x] Command line tool
+- [x] Support drag 'n drop
 
+*there is a bug with diagonal scaling
 
 ## 💭 How to use it
 
