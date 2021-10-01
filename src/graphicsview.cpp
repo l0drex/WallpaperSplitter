@@ -44,22 +44,27 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent *event) {
 }
 
 void GraphicsView::dragEnterEvent(QDragEnterEvent *event) {
-    if (event->mimeData()->hasImage() || event->mimeData()->hasUrls())
+    if (event->mimeData()->hasImage() || (event->mimeData()->hasUrls() && event->mimeData()->urls().first().isLocalFile())) {
         event->acceptProposedAction();
-    QGraphicsView::dragEnterEvent(event);
+    } else
+        QGraphicsView::dragEnterEvent(event);
 }
 
 void GraphicsView::dragMoveEvent(QDragMoveEvent *event) {
-    if (event->mimeData()->hasImage() || event->mimeData()->hasUrls())
+    if (event->mimeData()->hasImage() || event->mimeData()->hasUrls() && event->mimeData()->urls().first().isLocalFile())
         return;
-    QGraphicsView::dragMoveEvent(event);
+    else
+        QGraphicsView::dragMoveEvent(event);
 }
 
 void GraphicsView::dropEvent(QDropEvent *event) {
     if (event->mimeData()->hasImage()) {
+        qDebug() << "New image dropped";
         auto image = QImage::fromData(event->mimeData()->imageData().toByteArray());
         parent->addImage(image);
-    } else if (event->mimeData()->hasUrls())
+    } else if (event->mimeData()->hasUrls() && event->mimeData()->urls().first().isLocalFile()) {
+        qDebug() << "New url dropped";
         parent->addImage(event->mimeData()->urls().first());
-    QGraphicsView::dropEvent(event);
+    } else
+        QGraphicsView::dropEvent(event);
 }
