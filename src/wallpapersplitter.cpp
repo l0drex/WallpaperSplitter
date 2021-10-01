@@ -131,7 +131,7 @@ QStringList WallpaperSplitter::splitImage(const QString &path) {
     QList<QRect> screens = {};
     const auto screenItems = screenGroup->getRectangles();
     std::for_each(screenItems.begin(), screenItems.end(), [&](const QGraphicsRectItem *screen){
-        screens.append(screen->rect().toRect());
+        screens.append(screenGroup->sceneTransform().mapRect(screen->rect().toRect()));
     });
 
     unsetCursor();
