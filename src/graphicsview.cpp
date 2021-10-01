@@ -16,9 +16,8 @@ void GraphicsView::wheelEvent(QWheelEvent *event) {
         // 1 if zooming in, -1 if zooming out
         const auto scaleUp = 2*(event->angleDelta().y() < 0) - 1;
         const auto amount = 1 - ZOOM_AMOUNT * scaleUp;
+        setTransformationAnchor(AnchorUnderMouse);
         scale(amount, amount);
-
-        // TODO zoom to mouse position
         event->accept();
     } else
         QGraphicsView::wheelEvent(event);
