@@ -33,7 +33,7 @@ private:
     QFileInfo *imageFile;
 
     void scaleView();
-    QStringList splitImage(const QString &path);
+    QStringList splitImage();
     static inline QSize totalScreenSize();
 
 private slots:

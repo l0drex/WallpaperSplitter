@@ -122,10 +122,11 @@ QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile, const QStr
 
 QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile, const QPoint topLeft, const QPoint bottomRight) {
     const QString path = imageFile.absolutePath() + '/' + imageFile.baseName() + "_split";
+
     return splitImage(imageFile, path, topLeft, bottomRight);
 }
 
-QStringList WallpaperSplitter::splitImage(const QString &path) {
+QStringList WallpaperSplitter::splitImage() {
     setCursor(Qt::WaitCursor);
 
     QList<QRect> screens = {};
@@ -133,6 +134,10 @@ QStringList WallpaperSplitter::splitImage(const QString &path) {
     std::for_each(screenItems.begin(), screenItems.end(), [&](const QGraphicsRectItem *screen){
         screens.append(screenGroup->sceneTransform().mapRect(screen->rect().toRect()));
     });
+
+    QString path = QFileDialog::getExistingDirectory(
+            this, "",
+            imageFile->absolutePath(), QFileDialog::ShowDirsOnly);
 
     unsetCursor();
     return WallpaperSplitter::splitImage(*imageFile, screens, path);
@@ -143,8 +148,7 @@ QStringList WallpaperSplitter::splitImage(const QString &path) {
  */
 void WallpaperSplitter::applyWallpaper() {
     // use a temporary directory
-    QString tempPath = QDir::tempPath();
-    auto paths = splitImage(tempPath);
+    auto paths = splitImage();
     assert(!paths.isEmpty());
 
     // apply the wallpapers via a dbus call
@@ -181,9 +185,7 @@ void WallpaperSplitter::applyWallpaper() {
  * Splits the image and saves the resulting wallpapers in a subdirectory
  */
 void WallpaperSplitter::saveWallpapers() {
-    QString path = imageFile->absolutePath() + '/' + imageFile->baseName() + "_split";
-    splitImage(path);
-    qDebug() << "Image was split, pieces have been saved in" << path;
+    splitImage();
 }
 
 /**
