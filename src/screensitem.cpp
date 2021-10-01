@@ -66,8 +66,8 @@ void ScreensItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
     } else if (event->button() == Qt::LeftButton) {
         setCursor(Qt::DragMoveCursor);
         event->accept();
-    } else
-        event->ignore();
+    }
+    QGraphicsItem::mousePressEvent(event);
 }
 
 void ScreensItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
@@ -104,8 +104,8 @@ void ScreensItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
         }
         setScale(scale() * (1 - newScale));
         event->accept();
-    } else
-        event->ignore();
+    }
+    QGraphicsItem::mouseMoveEvent(event);
 }
 
 void ScreensItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
