@@ -65,7 +65,6 @@ void ScreensItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
         event->accept();
     } else if (event->button() == Qt::LeftButton) {
         setCursor(Qt::DragMoveCursor);
-        event->accept();
     }
     QGraphicsItem::mousePressEvent(event);
 }
@@ -112,6 +111,7 @@ void ScreensItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
     if(event->button() == Qt::MouseButton::RightButton) scalingMode = ScalingMode::none;
     unsetCursor();
     event->accept();
+    QGraphicsItem::mouseReleaseEvent(event);
 }
 
 QVariant ScreensItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value) {
