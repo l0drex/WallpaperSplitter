@@ -4,6 +4,8 @@
 
 #include <QMouseEvent>
 #include <QMimeData>
+#include <QGuiApplication>
+#include <QDebug>
 #include "graphicsview.h"
 
 GraphicsView::GraphicsView(WallpaperSplitter *parent) : QGraphicsView(parent) {
@@ -26,15 +28,22 @@ void GraphicsView::wheelEvent(QWheelEvent *event) {
 void GraphicsView::mousePressEvent(QMouseEvent *event) {
     if (event->button() == Qt::MiddleButton) {
         setCursor(Qt::DragMoveCursor);
+        lastCursorPosition = event->pos();
+        event->accept();
     }
     QGraphicsView::mousePressEvent(event);
 }
 
 void GraphicsView::mouseMoveEvent(QMouseEvent *event) {
-    if (event->button() == Qt::MiddleButton) {
-        // TODO move the scene
-    }
-    QGraphicsView::mouseMoveEvent(event);
+    if (event->buttons() == Qt::MiddleButton) {
+        // FIXME scene is always moved from the top left corner
+        setTransformationAnchor(NoAnchor);
+        const auto movement = mapToScene(event->pos() - lastCursorPosition);
+        qDebug() << movement;
+        translate(movement.x(), movement.y());
+        event->accept();
+    } else
+        QGraphicsView::mouseMoveEvent(event);
 }
 
 void GraphicsView::mouseReleaseEvent(QMouseEvent *event) {

@@ -17,7 +17,7 @@ public:
 
 private:
     WallpaperSplitter* parent;
-    QPointF lastCursorPosition;
+    QPoint lastCursorPosition;
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
