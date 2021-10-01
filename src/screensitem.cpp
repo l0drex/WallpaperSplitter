@@ -62,53 +62,56 @@ void ScreensItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
             if (pos.x() * pos.y() > 0) setCursor(Qt::SizeFDiagCursor);
             else setCursor(Qt::SizeBDiagCursor);
         }
-    }
-    QGraphicsItem::mousePressEvent(event);
+        event->accept();
+    } else if (event->button() == Qt::LeftButton) {
+        setCursor(Qt::DragMoveCursor);
+        event->accept();
+    } else
+        event->ignore();
 }
 
 void ScreensItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
-    switch (event->buttons()) {
-        case Qt::RightButton: {
-            const auto mouseMovement = event->pos() - event->buttonDownPos(Qt::RightButton);
-            // this is a vector from the center of this item to the mouse movement start point
-            const auto mouseStart = event->buttonDownPos(Qt::RightButton) - transformOriginPoint();
+    if (event->buttons() == Qt::RightButton) {
+        const auto mouseMovement = event->pos() - event->buttonDownPos(Qt::RightButton);
+        // this is the start position of the action relative to the transform origin (the center) of this item
+        const auto mouseStart = event->buttonDownPos(Qt::RightButton) - transformOriginPoint();
 
-            qreal newScale;
-            switch (scalingMode) {
-                case horizontal:
-                    newScale = mouseMovement.x() / transformOriginPoint().x();
-                    if (mouseStart.x() > 0) newScale *= -1;
-                    break;
+        qreal newScale;
+        switch (scalingMode) {
+            case horizontal:
+                newScale = mouseMovement.x() / transformOriginPoint().x();
+                if (mouseStart.x() > 0) newScale *= -1;
+                break;
 
-                case vertical:
-                    newScale = mouseMovement.y() / transformOriginPoint().y();
-                    if (mouseStart.y() > 0) newScale *= -1;
-                    break;
+            case vertical:
+                newScale = mouseMovement.y() / transformOriginPoint().y();
+                if (mouseStart.y() > 0) newScale *= -1;
+                break;
 
-                case diagonal:
-                    // FIXME this is very buggy
-                    newScale = mouseMovement.manhattanLength() / transformOriginPoint().manhattanLength();
-                    if (qAbs(newScale - scale()) > 1) return;
-                    break;
-
-                default:
-                    qWarning() << "No scaling mode is set!";
+            case diagonal:
+                // FIXME this is very buggy
+                newScale = mouseMovement.manhattanLength() / transformOriginPoint().manhattanLength();
+                if (qAbs(newScale - scale()) > 1) {
+                    event->ignore();
                     return;
-            }
-            setScale(scale() * (1 - newScale));
-            break;
+                }
+                break;
+
+            default:
+                qWarning() << "No scaling mode is set!";
+                event->ignore();
+                return;
         }
-        case Qt::LeftButton:
-            setCursor(Qt::DragMoveCursor);
-            break;
-    }
-    QGraphicsItem::mouseMoveEvent(event);
+        setScale(scale() * (1 - newScale));
+        event->accept();
+    } else
+        event->ignore();
 }
 
 void ScreensItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
     if(event->button() == Qt::MouseButton::RightButton) scalingMode = ScalingMode::none;
     unsetCursor();
-    QGraphicsItem::mouseReleaseEvent(event);
+    event->accept();
 }
 
 QVariant ScreensItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value) {
