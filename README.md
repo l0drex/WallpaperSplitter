@@ -10,7 +10,7 @@ Keep in mind that this only works with images, not with any fancy wallpaper engi
 
 ## 🚀 Features and roadmap
 
-This is only an oveeview. For a more in-depth look see the project tab. 
+This is only an overview. For a more in-depth look see the project tab. 
 - [x] Split a given image
 - [x] Apply the wallpaper from within the application
 - [x] Adjust position
