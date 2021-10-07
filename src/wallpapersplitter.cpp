@@ -112,7 +112,7 @@ QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile, const QStr
         geometry.moveTopLeft(topLeft + delta);
         // set bottom-right to desired position, if possible
         if (bottomRight.manhattanLength() > 0) {
-            geometry.setSize(geometry.size().scaled(bottomRight.x(), bottomRight.y(), Qt::KeepAspectRatioByExpanding));
+            geometry.setSize(geometry.size().scaled(bottomRight.x(), bottomRight.y(), Qt::KeepAspectRatio));
         }
         screenGeometries.append(geometry);
     });
