@@ -8,7 +8,7 @@
 #include <QApplication>
 #include <QGraphicsSceneMouseEvent>
 #include <QDebug>
-#include "ScreensItem.h"
+#include "screensitem.h"
 
 ScreensItem::ScreensItem(QGraphicsItem *parent) : QGraphicsItemGroup(parent) {
     addScreens();
@@ -51,56 +51,61 @@ const QList<QGraphicsRectItem *> &ScreensItem::getRectangles() const {
 void ScreensItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
     if(event->button() == Qt::RightButton) {
         const auto pos = transformOriginPoint() - event->pos();
-        if (-.3 * sceneBoundingRect().height() < pos.y() && pos.y() < .3 * sceneBoundingRect().height()) {
-            setCursor(Qt::SizeHorCursor);
-            scalingMode = horizontal;
-        } else if (-.3 * sceneBoundingRect().width() < pos.x() && pos.x() < .3 * sceneBoundingRect().width()) {
-            setCursor(Qt::SizeVerCursor);
-            scalingMode = vertical;
-        } else {
-            scalingMode = diagonal;
-            if (pos.x() * pos.y() > 0) setCursor(Qt::SizeFDiagCursor);
-            else setCursor(Qt::SizeBDiagCursor);
+
+        // check if cursor is far enough to the edge  before setting a scaling mode
+        // this prevents uncontrollable behaviour in the middle, where the mode cannot be detected
+        if (qAbs(pos.x()) > qAbs(transformOriginPoint().x() * .6) || qAbs(pos.y()) > qAbs(transformOriginPoint().y() * .6)) {
+            if (-.3 * sceneBoundingRect().height() < pos.y() && pos.y() < .3 * sceneBoundingRect().height()) {
+                setCursor(Qt::SizeHorCursor);
+                scalingMode = horizontal;
+            } else if (-.3 * sceneBoundingRect().width() < pos.x() && pos.x() < .3 * sceneBoundingRect().width()) {
+                setCursor(Qt::SizeVerCursor);
+                scalingMode = vertical;
+            } else {
+                scalingMode = diagonal;
+                if (pos.x() * pos.y() > 0) setCursor(Qt::SizeFDiagCursor);
+                else setCursor(Qt::SizeBDiagCursor);
+            }
+            event->accept();
         }
+    } else if (event->button() == Qt::LeftButton) {
+        setCursor(Qt::DragMoveCursor);
     }
     QGraphicsItem::mousePressEvent(event);
 }
 
 void ScreensItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
-    switch (event->buttons()) {
-        case Qt::RightButton: {
-            const auto mouseMovement = event->pos() - event->buttonDownPos(Qt::RightButton);
-            // this is a vector from the center of this item to the mouse movement start point
-            const auto mouseStart = event->buttonDownPos(Qt::RightButton) - transformOriginPoint();
+    if (event->buttons() == Qt::RightButton) {
+        const auto mouseMovement = event->pos() - event->buttonDownPos(Qt::RightButton);
+        // this is the start position of the action relative to the transform origin (the center) of this item
+        const auto mouseStart = event->buttonDownPos(Qt::RightButton) - transformOriginPoint();
 
-            qreal newScale;
-            switch (scalingMode) {
-                case horizontal:
-                    newScale = mouseMovement.x() / transformOriginPoint().x();
-                    if (mouseStart.x() > 0) newScale *= -1;
-                    break;
-
-                case vertical:
-                    newScale = mouseMovement.y() / transformOriginPoint().y();
-                    if (mouseStart.y() > 0) newScale *= -1;
-                    break;
-
-                case diagonal:
-                    // FIXME this is very buggy
-                    newScale = mouseMovement.manhattanLength() / transformOriginPoint().manhattanLength();
-                    if (qAbs(newScale - scale()) > 1) return;
-                    break;
-
-                default:
-                    qWarning() << "No scaling mode is set!";
-                    return;
-            }
-            setScale(scale() * (1 - newScale));
-            break;
+        // diagonal scaling uses the max difference
+        if (scalingMode == diagonal) {
+            if (mouseMovement.x() >= mouseMovement.y())
+                scalingMode = horizontal;
+            else
+                scalingMode = vertical;
         }
-        case Qt::LeftButton:
-            setCursor(Qt::DragMoveCursor);
-            break;
+
+        qreal newScale;
+        switch (scalingMode) {
+            case horizontal:
+                newScale = mouseMovement.x() / transformOriginPoint().x();
+                if (mouseStart.x() > 0) newScale *= -1;
+                break;
+
+            case vertical:
+                newScale = mouseMovement.y() / transformOriginPoint().y();
+                if (mouseStart.y() > 0) newScale *= -1;
+                break;
+
+            default:
+                event->ignore();
+                return;
+        }
+        setScale(scale() * (1 - newScale));
+        event->accept();
     }
     QGraphicsItem::mouseMoveEvent(event);
 }
@@ -108,6 +113,7 @@ void ScreensItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
 void ScreensItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
     if(event->button() == Qt::MouseButton::RightButton) scalingMode = ScalingMode::none;
     unsetCursor();
+    event->accept();
     QGraphicsItem::mouseReleaseEvent(event);
 }
 
@@ -118,11 +124,12 @@ QVariant ScreensItem::itemChange(QGraphicsItem::GraphicsItemChange change, const
             // of the item and the position. The difference is this delta vector.
             const QPointF delta = sceneBoundingRect().topLeft() - pos();
             QPointF newTopLeft = value.toPointF()  + delta;
-            const QPointF newBottomRight = newTopLeft + sceneBoundingRect().bottomLeft() + QPoint(1, 1);
+            const QPointF newBottomRight = newTopLeft + sceneBoundingRect().bottomRight() + QPoint(1, 1);
             QRectF rect = parentItem()->sceneBoundingRect();
+
             if(!rect.contains(newTopLeft) || !rect.contains(newBottomRight)) {
-                newTopLeft.setX(qMin(qMax(rect.left(), newTopLeft.x()), rect.right() + 1 - sceneBoundingRect().width()));
-                newTopLeft.setY(qMin(qMax(rect.top(), newTopLeft.y()), rect.bottom() + 1 - sceneBoundingRect().height()));
+                newTopLeft.setX(qBound(rect.left(), newTopLeft.x(), rect.right() + 1 - sceneBoundingRect().width()));
+                newTopLeft.setY(qBound(rect.top(), newTopLeft.y(), rect.bottom() + 1 - sceneBoundingRect().height()));
                 return newTopLeft - delta;
             }
             break;

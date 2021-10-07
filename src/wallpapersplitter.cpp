@@ -14,12 +14,19 @@
 #include <QPushButton>
 #include "wallpapersplitter.h"
 #include "ui_wallpapersplitter.h"
-#include "ScreensItem.h"
+#include "screensitem.h"
+#include "graphicsview.h"
 
 
 WallpaperSplitter::WallpaperSplitter(QWidget *parent) :
         QDialog(parent), ui(new Ui::WallpaperSplitter) {
     ui->setupUi(this);
+
+    // replace the standard graphics view with my subclass
+    auto graphicsView = new GraphicsView(this);
+    delete ui->verticalLayout->replaceWidget(ui->graphicsView, graphicsView)->widget();
+    ui->graphicsView = graphicsView;
+
     ui->graphicsView->setScene(new QGraphicsScene());
     ui->graphicsView->scene()->addText(tr("Press 'open' to select an image"));
     imageFile = new QFileInfo();
@@ -34,44 +41,26 @@ WallpaperSplitter::WallpaperSplitter(QWidget *parent) :
             this, &QDialog::reject);
 }
 
+/**
+ * Opens a dialog that asks the user to select an image.
+ *
+ * Then sets the file info and image attribute, displays the image and calls addScreens().
+ * The image will be scaled to fit on all screens, also the graphics view will be scaled to show the whole image.
+ */
 void WallpaperSplitter::selectImage() {
-    /**
-     * Opens a dialog that asks the user to select an image.
-     *
-     * Then sets the file info and image attribute, displays the image and calls addScreens().
-     * The image will be scaled to fit on all screens, also the graphics view will be scaled to show the whole image.
-     */
     const auto url = QFileDialog::getOpenFileUrl(
             this,
             tr("Select a wallpaper image"),
             "file://" + QStandardPaths::writableLocation(QStandardPaths::PicturesLocation),
             QString("image")
     );
-    // if process was cancelled
-    if(url.isEmpty()) return;
-
-    imageFile = new QFileInfo(url.path());
-    auto image = new QImage(imageFile->filePath());
-    qDebug() << "Image" << imageFile->fileName() << "selected.";
-
-    // scale the image so that it fits
-    const auto screenSize = totalScreenSize();
-    if(image->width() < screenSize.width() || image->height() < screenSize.height()){
-        *image = image->scaled(screenSize, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
-    }
-
-    ui->graphicsView->scene()->clear();
-    auto imageItem = ui->graphicsView->scene()->addPixmap(QPixmap::fromImage(*image));
-    imageItem->setFlag(QGraphicsItem::ItemContainsChildrenInShape);
-    screenGroup = new ScreensItem(imageItem);
-    scaleView();
+    addImage(url);
 }
 
+/**
+ * Splits the previously selected image and returns a list to all paths where the images were saved.
+ */
 QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile, const QList<QRect> &screens, const QString &path) {
-    /**
-     * Splits the previously selected image and returns a list to all paths where the images were saved.
-     */
-
     if (screens.isEmpty()) {
         qFatal("No area to cut out provided!");
     }
@@ -123,7 +112,7 @@ QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile, const QStr
         geometry.moveTopLeft(topLeft + delta);
         // set bottom-right to desired position, if possible
         if (bottomRight.manhattanLength() > 0) {
-            geometry.setSize(geometry.size().scaled(bottomRight.x(), bottomRight.y(), Qt::KeepAspectRatioByExpanding));
+            geometry.setSize(geometry.size().scaled(bottomRight.x(), bottomRight.y(), Qt::KeepAspectRatio));
         }
         screenGeometries.append(geometry);
     });
@@ -133,29 +122,33 @@ QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile, const QStr
 
 QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile, const QPoint topLeft, const QPoint bottomRight) {
     const QString path = imageFile.absolutePath() + '/' + imageFile.baseName() + "_split";
+
     return splitImage(imageFile, path, topLeft, bottomRight);
 }
 
-QStringList WallpaperSplitter::splitImage(const QString &path) {
+QStringList WallpaperSplitter::splitImage() {
     setCursor(Qt::WaitCursor);
 
     QList<QRect> screens = {};
     const auto screenItems = screenGroup->getRectangles();
     std::for_each(screenItems.begin(), screenItems.end(), [&](const QGraphicsRectItem *screen){
-        screens.append(screen->rect().toRect());
+        screens.append(screenGroup->sceneTransform().mapRect(screen->rect().toRect()));
     });
+
+    QString path = QFileDialog::getExistingDirectory(
+            this, "",
+            imageFile->absolutePath(), QFileDialog::ShowDirsOnly);
 
     unsetCursor();
     return WallpaperSplitter::splitImage(*imageFile, screens, path);
 }
 
+/**
+ * Applies the selected image to all screens in the current activity.
+ */
 void WallpaperSplitter::applyWallpaper() {
-    /**
-     * Applies the selected image to all screens in the current activity.
-     */
     // use a temporary directory
-    QString tempPath = QDir::tempPath();
-    auto paths = splitImage(tempPath);
+    auto paths = splitImage();
     assert(!paths.isEmpty());
 
     // apply the wallpapers via a dbus call
@@ -188,19 +181,17 @@ void WallpaperSplitter::applyWallpaper() {
     QApplication::quit();
 }
 
+/**
+ * Splits the image and saves the resulting wallpapers in a subdirectory
+ */
 void WallpaperSplitter::saveWallpapers() {
-    /**
-     * Splits the image and saves the resulting wallpapers in a subdirectory
-     */
-    QString path = imageFile->absolutePath() + '/' + imageFile->baseName() + "_split";
-    splitImage(path);
-    qDebug() << "Image was split, pieces have been saved in" << path;
+    splitImage();
 }
 
+/**
+ * Calculates the total size of all screens combined.
+ */
 QSize WallpaperSplitter::totalScreenSize() {
-    /**
-     * Calculates the total size of all screens combined.
-     */
     auto screens = QApplication::screens();
     // get combined height and width of all screens
     auto *screensRect = new QGraphicsItemGroup();
@@ -223,4 +214,27 @@ void WallpaperSplitter::scaleView() {
 
 WallpaperSplitter::~WallpaperSplitter() {
     delete ui;
+}
+
+void WallpaperSplitter::addImage(QImage &image) {
+    // scale the image so that it fits
+    const auto screenSize = totalScreenSize();
+    if(image.width() < screenSize.width() || image.height() < screenSize.height()){
+        image = image.scaled(screenSize, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+    }
+
+    ui->graphicsView->scene()->clear();
+    auto imageItem = ui->graphicsView->scene()->addPixmap(QPixmap::fromImage(image));
+    imageItem->setFlag(QGraphicsItem::ItemContainsChildrenInShape);
+    screenGroup = new ScreensItem(imageItem);
+    scaleView();
+}
+
+void WallpaperSplitter::addImage(const QUrl &url) {
+    if(url.isEmpty()) return;
+
+    imageFile = new QFileInfo(url.path());
+    auto image = new QImage(imageFile->filePath());
+    qDebug() << "Image" << imageFile->fileName() << "selected.";
+    addImage(*image);
 }
