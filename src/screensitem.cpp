@@ -120,12 +120,12 @@ QVariant ScreensItem::itemChange(QGraphicsItem::GraphicsItemChange change, const
             // of the item and the position. The difference is this delta vector.
             const QPointF delta = sceneBoundingRect().topLeft() - pos();
             QPointF newTopLeft = value.toPointF()  + delta;
-            const QPointF newBottomRight = newTopLeft + sceneBoundingRect().bottomLeft() + QPoint(1, 1);
+            const QPointF newBottomRight = newTopLeft + sceneBoundingRect().bottomRight() + QPoint(1, 1);
             QRectF rect = parentItem()->sceneBoundingRect();
-            // FIXME item escapes somewhere on the right side
+
             if(!rect.contains(newTopLeft) || !rect.contains(newBottomRight)) {
-                newTopLeft.setX(qMin(qMax(rect.left(), newTopLeft.x()), rect.right() + 1 - sceneBoundingRect().width()));
-                newTopLeft.setY(qMin(qMax(rect.top(), newTopLeft.y()), rect.bottom() + 1 - sceneBoundingRect().height()));
+                newTopLeft.setX(qBound(rect.left(), newTopLeft.x(), rect.right() + 1 - sceneBoundingRect().width()));
+                newTopLeft.setY(qBound(rect.top(), newTopLeft.y(), rect.bottom() + 1 - sceneBoundingRect().height()));
                 return newTopLeft - delta;
             }
             break;
