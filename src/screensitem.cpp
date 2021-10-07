@@ -75,6 +75,14 @@ void ScreensItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
         // this is the start position of the action relative to the transform origin (the center) of this item
         const auto mouseStart = event->buttonDownPos(Qt::RightButton) - transformOriginPoint();
 
+        // diagonal scaling uses the max difference
+        if (scalingMode == diagonal) {
+            if (mouseMovement.x() >= mouseMovement.y())
+                scalingMode = horizontal;
+            else
+                scalingMode = vertical;
+        }
+
         qreal newScale;
         switch (scalingMode) {
             case horizontal:
@@ -85,15 +93,6 @@ void ScreensItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
             case vertical:
                 newScale = mouseMovement.y() / transformOriginPoint().y();
                 if (mouseStart.y() > 0) newScale *= -1;
-                break;
-
-            case diagonal:
-                // FIXME this is very buggy
-                newScale = mouseMovement.manhattanLength() / transformOriginPoint().manhattanLength();
-                if (qAbs(newScale - scale()) > 1) {
-                    event->ignore();
-                    return;
-                }
                 break;
 
             default:
