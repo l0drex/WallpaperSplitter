@@ -35,7 +35,7 @@ void GraphicsView::mousePressEvent(QMouseEvent *event) {
 }
 
 void GraphicsView::mouseMoveEvent(QMouseEvent *event) {
-    if (event->buttons() == Qt::MiddleButton) {
+    if (false && event->buttons() == Qt::MiddleButton) {
         // FIXME scene is always moved from the top left corner
         setTransformationAnchor(NoAnchor);
         const auto movement = mapToScene(event->pos() - lastCursorPosition);
