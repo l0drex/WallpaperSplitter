@@ -51,18 +51,23 @@ const QList<QGraphicsRectItem *> &ScreensItem::getRectangles() const {
 void ScreensItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
     if(event->button() == Qt::RightButton) {
         const auto pos = transformOriginPoint() - event->pos();
-        if (-.3 * sceneBoundingRect().height() < pos.y() && pos.y() < .3 * sceneBoundingRect().height()) {
-            setCursor(Qt::SizeHorCursor);
-            scalingMode = horizontal;
-        } else if (-.3 * sceneBoundingRect().width() < pos.x() && pos.x() < .3 * sceneBoundingRect().width()) {
-            setCursor(Qt::SizeVerCursor);
-            scalingMode = vertical;
-        } else {
-            scalingMode = diagonal;
-            if (pos.x() * pos.y() > 0) setCursor(Qt::SizeFDiagCursor);
-            else setCursor(Qt::SizeBDiagCursor);
+
+        // check if cursor is far enough to the edge  before setting a scaling mode
+        // this prevents uncontrollable behaviour in the middle, where the mode cannot be detected
+        if (qAbs(pos.x()) > qAbs(transformOriginPoint().x() * .6) || qAbs(pos.y()) > qAbs(transformOriginPoint().y() * .6)) {
+            if (-.3 * sceneBoundingRect().height() < pos.y() && pos.y() < .3 * sceneBoundingRect().height()) {
+                setCursor(Qt::SizeHorCursor);
+                scalingMode = horizontal;
+            } else if (-.3 * sceneBoundingRect().width() < pos.x() && pos.x() < .3 * sceneBoundingRect().width()) {
+                setCursor(Qt::SizeVerCursor);
+                scalingMode = vertical;
+            } else {
+                scalingMode = diagonal;
+                if (pos.x() * pos.y() > 0) setCursor(Qt::SizeFDiagCursor);
+                else setCursor(Qt::SizeBDiagCursor);
+            }
+            event->accept();
         }
-        event->accept();
     } else if (event->button() == Qt::LeftButton) {
         setCursor(Qt::DragMoveCursor);
     }
@@ -96,7 +101,6 @@ void ScreensItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
                 break;
 
             default:
-                qWarning() << "No scaling mode is set!";
                 event->ignore();
                 return;
         }
