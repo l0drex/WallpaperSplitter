@@ -58,7 +58,7 @@ void WallpaperSplitter::selectImage() {
 }
 
 /**
- * Splits the previously selected image and returns a list to all paths where the images were saved.
+ * Splits the selected image and returns a list to all paths where the images were saved.
  */
 QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile, const QList<QRect> &screens, const QString &path) {
     if (screens.isEmpty()) {
@@ -156,16 +156,13 @@ void WallpaperSplitter::applyWallpaper() {
     QTextStream out(&script);
     // language=JavaScript
     out << "var paths = ['" + paths.join("', '") + "'];"
-        << "var pathIterator = 0;"
-        << "var activity = currentActivity();"
-        << "for(var key in desktopsForActivity(activity)) {"
-        << "    var d = desktopsForActivity(activity)[key];"
+        << "var desktops = desktopsForActivity(currentActivity());"
+        << "for(let i in desktops) {"
+        << "    let d = desktops[i];"
         << "    d.wallpaperPlugin = 'org.kde.image';"
         << "    d.currentConfigGroup = ['Wallpaper', 'org.kde.image', 'General'];"
-        << "    d.writeConfig('Image', paths[pathIterator]);"
-        << "    if(key > 0) {"
-        << "        pathIterator++;"
-        << "}}";
+        << "    d.writeConfig('Image', paths[i]);"
+        << "}";
     auto message = QDBusMessage::createMethodCall(
             "org.kde.plasmashell",
             "/PlasmaShell", "org.kde.PlasmaShell",
@@ -217,16 +214,20 @@ WallpaperSplitter::~WallpaperSplitter() {
 }
 
 void WallpaperSplitter::addImage(QImage &image) {
-    // scale the image so that it fits
-    const auto screenSize = totalScreenSize();
-    if(image.width() < screenSize.width() || image.height() < screenSize.height()){
-        image = image.scaled(screenSize, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
-    }
-
     ui->graphicsView->scene()->clear();
     auto imageItem = ui->graphicsView->scene()->addPixmap(QPixmap::fromImage(image));
     imageItem->setFlag(QGraphicsItem::ItemContainsChildrenInShape);
     screenGroup = new ScreensItem(imageItem);
+
+    // scale the desktops so that the image fits
+    const auto screenSize = totalScreenSize();
+    if(image.width() < screenSize.width() || image.height() < screenSize.height()) {
+        // this is hacky and not performant at all
+        auto imageScaled = image.scaled(screenSize, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+        qreal scale = (float) imageScaled.width() / (float) image.width();
+        screenGroup->setScale(1 / scale);
+        screenGroup->setPos(imageItem->scenePos());
+    }
     scaleView();
 }
 
