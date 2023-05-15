@@ -10,6 +10,10 @@
 #include <QDebug>
 #include "screensitem.h"
 
+bool ScreenComparator(const QScreen *a, const QScreen *b) {
+    return a->geometry().x() < b->geometry().x();
+}
+
 ScreensItem::ScreensItem(QGraphicsItem *parent) : QGraphicsItemGroup(parent) {
     addScreens();
 
@@ -32,10 +36,13 @@ void ScreensItem::addScreens() {
     const auto colorScheme = KColorScheme();
     const auto pen = QPen(colorScheme.foreground(KColorScheme::ForegroundRole::ActiveText), 2);
 
+    // I don't fully understand why this is necessary
+    // most likely this will fail in different configs
+    std::sort(screens.begin(), screens.end(), ScreenComparator);
     // draw a rectangle for every screen
     std::for_each(screens.begin(), screens.end(), [&](const QScreen* screen){
         const auto rect = new QGraphicsRectItem();
-        rect->setRect(QRect(screen->geometry()));
+        rect->setRect(screen->geometry());
         rect->setPen(pen);
         rect->setBrush(colorScheme.background(KColorScheme::BackgroundRole::ActiveBackground));
         rect->setOpacity(0.5);
