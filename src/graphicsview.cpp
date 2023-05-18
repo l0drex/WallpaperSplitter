@@ -6,6 +6,8 @@
 #include <QMimeData>
 #include <QGuiApplication>
 #include <QDebug>
+#include <QImageReader>
+#include <QMimeDatabase>
 #include "graphicsview.h"
 
 GraphicsView::GraphicsView(WallpaperSplitter *parent) : QGraphicsView(parent) {
@@ -51,18 +53,44 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent *event) {
     QGraphicsView::mouseReleaseEvent(event);
 }
 
+bool isLocalImageFile(const QUrl& url)
+{
+    if (!url.isLocalFile()) return false;
+
+    QMimeDatabase mimeDatabase;
+    QMimeType mimeType = mimeDatabase.mimeTypeForUrl(url);
+    auto mimeTypeName = mimeType.name();
+
+    // Check if the MIME type indicates an image
+    return mimeTypeName.startsWith("image/");
+}
+
+bool checkDrop(QDragMoveEvent *event) {
+    if (event->mimeData()->hasImage()) {
+        return true;
+    } else if (event->mimeData()->hasUrls()) {
+        if (isLocalImageFile(event->mimeData()->urls().first())) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void GraphicsView::dragEnterEvent(QDragEnterEvent *event) {
-    if (event->mimeData()->hasImage() || (event->mimeData()->hasUrls() && event->mimeData()->urls().first().isLocalFile())) {
+    if (checkDrop(event)) {
         event->acceptProposedAction();
-    } else
+    } else {
         QGraphicsView::dragEnterEvent(event);
+    }
 }
 
 void GraphicsView::dragMoveEvent(QDragMoveEvent *event) {
-    if (event->mimeData()->hasImage() || event->mimeData()->hasUrls() && event->mimeData()->urls().first().isLocalFile())
-        return;
-    else
+    if (checkDrop(event)) {
+        event->acceptProposedAction();
+    } else {
         QGraphicsView::dragMoveEvent(event);
+    }
 }
 
 void GraphicsView::dropEvent(QDropEvent *event) {
@@ -70,9 +98,12 @@ void GraphicsView::dropEvent(QDropEvent *event) {
         qDebug() << "New image dropped";
         auto image = QImage::fromData(event->mimeData()->imageData().toByteArray());
         parent->addImage(image);
-    } else if (event->mimeData()->hasUrls() && event->mimeData()->urls().first().isLocalFile()) {
-        qDebug() << "New url dropped";
-        parent->addImage(event->mimeData()->urls().first());
+    } else if (event->mimeData()->hasUrls()) {
+        auto url = event->mimeData()->urls().first();
+        if (isLocalImageFile(url)) {
+            qDebug() << "New url dropped";
+            parent->addImage(url);
+        }
     } else
         QGraphicsView::dropEvent(event);
 }
