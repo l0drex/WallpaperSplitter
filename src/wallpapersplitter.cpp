@@ -60,15 +60,11 @@ void WallpaperSplitter::selectImage() {
 /**
  * Splits the selected image and returns a list to all paths where the images were saved.
  */
-QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile, const QList<QRect> &screens, const QString &path) {
+QStringList WallpaperSplitter::splitImage(const QImage &image, const QList<QRect> &screens, const QString &path) {
     if (screens.isEmpty()) {
         qFatal("No area to cut out provided!");
     }
-    if(!imageFile.isFile()) {
-        qFatal("Image was not loaded correctly!");
-    }
-    auto image = new QImage(imageFile.filePath());
-    if (image->isNull() || image->sizeInBytes() < 0) {
+    if (image.isNull() || image.sizeInBytes() < 0) {
         qFatal("Image could not be loaded");
     }
 
@@ -79,18 +75,18 @@ QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile, const QLis
     int index = 0;
 
     std::for_each(screens.begin(), screens.end(), [&](const QRect screen){
-        if (!image->rect().contains(screen.topLeft())) {
+        if (!image.rect().contains(screen.topLeft())) {
             qWarning("Image does not contain the top left corner of the provided rectangle!");
         }
-        if (!image->rect().contains(screen.bottomRight())) {
+        if (!image.rect().contains(screen.bottomRight())) {
             qWarning("Image does not contain the bottom right position of the provided rectangle!");
         }
 
         // copy a rectangle with size and position of the screen
-        wallpaper = image->copy(screen);
+        wallpaper = image.copy(screen);
 
-        // images are saved in a subdirectory called split with a number as suffix
-        fileName = path + '/' + QString::number(index) + '.' + imageFile.suffix();
+        // images are saved as 0.png 1.png etc
+        fileName = path + '/' + QString::number(index) + ".png";
         paths.append(fileName);
 
         // if this returns false, the save failed and the assertion fails
@@ -102,7 +98,7 @@ QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile, const QLis
     return paths;
 }
 
-QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile, const QString &path, const QPoint topLeft, const QPoint bottomRight) {
+QStringList WallpaperSplitter::splitImage(const QImage &image, const QString &path, const QPoint topLeft, const QPoint bottomRight) {
     QList<QRect> screenGeometries{};
     const auto screens = QApplication::screens();
     std::for_each(screens.begin(), screens.end(), [&](const QScreen* screen){
@@ -117,13 +113,7 @@ QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile, const QStr
         screenGeometries.append(geometry);
     });
 
-    return splitImage(imageFile, screenGeometries, path);
-}
-
-QStringList WallpaperSplitter::splitImage(const QFileInfo &imageFile, const QPoint topLeft, const QPoint bottomRight) {
-    const QString path = imageFile.absolutePath() + '/' + imageFile.baseName() + "_split";
-
-    return splitImage(imageFile, path, topLeft, bottomRight);
+    return splitImage(image, screenGeometries, path);
 }
 
 QStringList WallpaperSplitter::splitImage() {
@@ -135,19 +125,25 @@ QStringList WallpaperSplitter::splitImage() {
         screens.append(screenGroup->sceneTransform().mapRect(screen->rect().toRect()));
     });
 
-    QString path = QFileDialog::getExistingDirectory(
-            this, "",
-            imageFile->absolutePath(), QFileDialog::ShowDirsOnly);
+    QString path;
+    if (imageFile->isFile()) {
+        path = QFileDialog::getExistingDirectory(
+                this, "",
+                imageFile->absolutePath(), QFileDialog::ShowDirsOnly);
+    } else {
+        path = QFileDialog::getExistingDirectory(
+                this, "",
+                QStandardPaths::standardLocations(QStandardPaths::PicturesLocation)[0], QFileDialog::ShowDirsOnly);
+    }
 
     unsetCursor();
-    return WallpaperSplitter::splitImage(*imageFile, screens, path);
+    return WallpaperSplitter::splitImage(*wallpaper, screens, path);
 }
 
 /**
  * Applies the selected image to all screens in the current activity.
  */
 void WallpaperSplitter::applyWallpaper() {
-    // use a temporary directory
     auto paths = splitImage();
     assert(!paths.isEmpty());
 
@@ -215,6 +211,7 @@ WallpaperSplitter::~WallpaperSplitter() {
 
 void WallpaperSplitter::addImage(QImage &image) {
     ui->graphicsView->scene()->clear();
+    wallpaper = new QImage(image);
     auto imageItem = ui->graphicsView->scene()->addPixmap(QPixmap::fromImage(image));
     imageItem->setFlag(QGraphicsItem::ItemContainsChildrenInShape);
     screenGroup = new ScreensItem(imageItem);

@@ -96,7 +96,7 @@ void GraphicsView::dragMoveEvent(QDragMoveEvent *event) {
 void GraphicsView::dropEvent(QDropEvent *event) {
     if (event->mimeData()->hasImage()) {
         qDebug() << "New image dropped";
-        auto image = QImage::fromData(event->mimeData()->imageData().toByteArray());
+        auto image = qvariant_cast<QImage>(event->mimeData()->imageData());
         parent->addImage(image);
     } else if (event->mimeData()->hasUrls()) {
         auto url = event->mimeData()->urls().first();

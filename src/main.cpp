@@ -62,11 +62,11 @@ int main(int argc, char *argv[]) {
         QString path = parser.value("destination");
         QPoint topLeft = stringToPoint(parser.value("top-left"));
         QPoint bottomRight = stringToPoint(parser.value("bottom-right"));
-        if (!path.isEmpty()) {
-            filePaths = WallpaperSplitter::splitImage(imageFile, path, topLeft, bottomRight);
-        } else {
-            filePaths = WallpaperSplitter::splitImage(imageFile, topLeft, bottomRight);
+        auto image = new QImage(imageFile.filePath());
+        if (path.isEmpty()) {
+            path = imageFile.absolutePath() + '/' + imageFile.baseName() + "_split";
         }
+        filePaths = WallpaperSplitter::splitImage(*image, path, topLeft, bottomRight);
 
         std::for_each(filePaths.begin(), filePaths.end(), [&](const QString& item){
             std::cout << item.toStdString() << std::endl;
