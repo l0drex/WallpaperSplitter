@@ -58,13 +58,13 @@ int main(int argc, char *argv[]) {
         const QStringList args = parser.positionalArguments();
 
         QStringList filePaths;
-        QFileInfo imageFile = args.at(0);
+        QFileInfo* imageFile = new QFileInfo(args.at(0));
         QString path = parser.value("destination");
         QPoint topLeft = stringToPoint(parser.value("top-left"));
         QPoint bottomRight = stringToPoint(parser.value("bottom-right"));
-        auto image = new QImage(imageFile.filePath());
+        auto image = new QImage(imageFile->filePath());
         if (path.isEmpty()) {
-            path = imageFile.absolutePath() + '/' + imageFile.baseName() + "_split";
+            path = imageFile->absolutePath() + '/' + imageFile->baseName() + "_split";
         }
         filePaths = WallpaperSplitter::splitImage(*image, path, topLeft, bottomRight);
 

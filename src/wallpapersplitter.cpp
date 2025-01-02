@@ -52,7 +52,7 @@ void WallpaperSplitter::selectImage() {
             this,
             tr("Select a wallpaper image"),
             "file://" + QStandardPaths::writableLocation(QStandardPaths::PicturesLocation),
-            QString("image")
+            QString("Images (*.jpg *.png *.bmp)")
     );
     addImage(url);
 }
