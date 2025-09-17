@@ -27,8 +27,16 @@ WallpaperSplitter::WallpaperSplitter(QWidget *parent) :
     delete ui->verticalLayout->replaceWidget(ui->graphicsView, graphicsView)->widget();
     ui->graphicsView = graphicsView;
 
-    ui->graphicsView->setScene(new QGraphicsScene());
-    ui->graphicsView->scene()->addText(tr("Press 'open' to select an image"));
+    auto scene = new QGraphicsScene();
+    ui->graphicsView->setScene(scene);
+    auto text = ui->graphicsView->scene()->addText(tr("Drop an image here"));
+    // make sure its fixed size
+    text->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
+    // center it
+    auto rect = text->boundingRect();
+    text->setTransformOriginPoint(rect.center());
+    text->setPos(-rect.width() / 2.0, -rect.height() / 2.0);
+    ui->graphicsView->centerOn(text);
     imageFile = new QFileInfo();
 
     connect(ui->buttonBoxOpen, &QDialogButtonBox::accepted,
