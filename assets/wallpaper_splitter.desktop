@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+
+Name=Wallpaper Splitter
+Comment=Small utility to split wallpaper images for multi-monitor use.
+Categories=Utility;
+
+Icon=io.github.l0drex.wallpaper_splitter
+Exec=wallpaper_splitter
+Terminal=false
