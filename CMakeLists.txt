@@ -33,3 +33,5 @@ target_link_libraries(wallpaper_splitter
         Qt::DBus
         KF6::ConfigWidgets
 )
+
+install(TARGETS wallpaper_splitter RUNTIME DESTINATION bin)
