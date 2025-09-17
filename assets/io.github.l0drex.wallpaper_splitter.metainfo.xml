@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2025 Lorenz Hoffmann -->
+<component type="desktop-application">
+    <id>io.github.l0drex.wallpaper_splitter</id>
+    
+    <metadata_license>CC0-1.0</metadata_license>
+    <project_license>GPL-3.0-only</project_license>
+    
+    <name>Wallpaper Splitter</name>
+    <summary>Split wallpaper images for multi-monitor usage</summary>
+
+    <developer id="io.github.l0drex">
+        <name>Lorenz Hoffmann</name>
+    </developer>
+
+    <description>
+        <p>
+            This app detects the size and layout of your monitors 
+            and cuts an image so it can be applied as a wallpaper spreading across your monitors.
+            You can save the image to the disk (e.g., for slideshows) or directly apply it.
+        </p>
+    </description>
+
+    <launchable type="desktop-id">io.github.l0drex.wallpaper_splitter.desktop</launchable>
+    
+    <icon type="stock">io.github.l0drex.wallpaper_splitter</icon>
+    
+    <branding>
+        <color type="primary" scheme_preference="light">#ccdffb</color>
+        <color type="primary" scheme_preference="dark">#3e668e</color>
+    </branding>
+
+    <content_rating type="oars-1.1" />
+
+    <url type="bugtracker">https://github.com/l0drex/WallpaperSplitter/issues</url>
+    <url type="contribute">https://github.com/l0drex/WallpaperSplitter</url>
+    <url type="vcs-browser">https://github.com/l0drex/WallpaperSplitter</url>
+
+    <screenshots>
+        <screenshot type="default">
+            <caption>The app show the wallpaper with the monitor layout layered on top.</caption>
+            <image>https://github.com/l0drex/WallpaperSplitter/blob/8a41be01da90d975923ac921e29404833a7fce20/assets/screenshot.png?raw=true</image>
+        </screenshot>
+    </screenshots>
+    
+    <releases>
+        <release version="1.0.0" date="2023-08-07">
+            <url type="details">https://github.com/l0drex/WallpaperSplitter/releases/tag/v1.0.0</url>
+            <description>
+                <p>Initial Release</p>
+                <ul>
+                    <li>Save wallpaper to disk</li>
+                    <li>Apply wallpaper on KDE Plasma</li>
+                    <li>Alpha release of the console app</li>
+                </ul>
+            </description>
+        </release>
+    </releases>
+
+    <requires>
+        <control>keyboard</control>
+        <control>pointing</control>
+        <display_length compare="ge">768</display_length>
+    </requires>
+</component>
