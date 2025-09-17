@@ -22,7 +22,7 @@ ScreensItem::ScreensItem(QGraphicsItem *parent) : QGraphicsItemGroup(parent) {
     setAcceptedMouseButtons(Qt::RightButton);
     setFlag(ItemIsMovable);
     setFlag(ItemSendsGeometryChanges);
-    setTransformOriginPoint(sceneBoundingRect().center());
+    setTransformOriginPoint(boundingRect().center());
 
     // calculate maximum scale
     qreal maxScaleWidth = parentItem()->boundingRect().width() / childrenBoundingRect().width();

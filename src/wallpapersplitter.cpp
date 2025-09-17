@@ -219,9 +219,11 @@ WallpaperSplitter::~WallpaperSplitter() {
 
 void WallpaperSplitter::addImage(QImage &image) {
     ui->graphicsView->scene()->clear();
+
     wallpaper = new QImage(image);
     auto imageItem = ui->graphicsView->scene()->addPixmap(QPixmap::fromImage(image));
     imageItem->setFlag(QGraphicsItem::ItemContainsChildrenInShape);
+
     screenGroup = new ScreensItem(imageItem);
 
     // scale the desktops so that the image fits
@@ -233,6 +235,9 @@ void WallpaperSplitter::addImage(QImage &image) {
         screenGroup->setScale(1 / scale);
         screenGroup->setPos(imageItem->scenePos());
     }
+
+    screenGroup->setPos(imageItem->boundingRect().center());
+
     scaleView();
 }
 
