@@ -35,3 +35,15 @@ target_link_libraries(wallpaper_splitter
 )
 
 install(TARGETS wallpaper_splitter RUNTIME DESTINATION bin)
+
+# Install metadata
+install(FILES assets/icon.svg
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps
+    RENAME io.github.l0drex.wallpaper_splitter.svg)
+
+install(FILES assets/metainfo.xml
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo)
+
+install(FILES assets/wallpaper_splitter.desktop
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/applications
+    RENAME io.github.l0drex.wallpaper_splitter.desktop)
