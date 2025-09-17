@@ -46,6 +46,15 @@ void ScreensItem::addScreens() {
         rect->setPen(pen);
         rect->setBrush(colorScheme.background(KColorScheme::BackgroundRole::ActiveBackground));
         rect->setOpacity(0.5);
+
+        auto name = new QGraphicsTextItem(screen->model());
+        name->adjustSize();
+        name->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
+        // todo does not work
+        name->setTransformOriginPoint(name->boundingRect().center());
+        name->setPos(screen->geometry().center());
+        addToGroup(name);
+
         addToGroup(rect);
         rectangles.append(rect);
     });
