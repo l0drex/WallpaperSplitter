@@ -32,20 +32,20 @@
 
     <content_rating type="oars-1.1" />
 
-    <url type="bugtracker">https://github.com/l0drex/WallpaperSplitter/issues</url>
-    <url type="contribute">https://github.com/l0drex/WallpaperSplitter</url>
-    <url type="vcs-browser">https://github.com/l0drex/WallpaperSplitter</url>
+    <url type="bugtracker">https://github.com/l0drex/wallpaper_splitter/issues</url>
+    <url type="contribute">https://github.com/l0drex/wallpaper_splitter</url>
+    <url type="vcs-browser">https://github.com/l0drex/wallpaper_splitter</url>
 
     <screenshots>
         <screenshot type="default">
             <caption>The app show the wallpaper with the monitor layout layered on top.</caption>
-            <image>https://github.com/l0drex/WallpaperSplitter/blob/8a41be01da90d975923ac921e29404833a7fce20/assets/screenshot.png?raw=true</image>
+            <image>https://github.com/l0drex/wallpaper_splitter/blob/8a41be01da90d975923ac921e29404833a7fce20/assets/screenshot.png?raw=true</image>
         </screenshot>
     </screenshots>
     
     <releases>
         <release version="1.0.0" date="2023-08-07">
-            <url type="details">https://github.com/l0drex/WallpaperSplitter/releases/tag/v1.0.0</url>
+            <url type="details">https://github.com/l0drex/wallpaper_splitter/releases/tag/v1.0.0</url>
             <description>
                 <p>Initial Release</p>
                 <ul>
