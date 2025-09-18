@@ -14,7 +14,7 @@
    <string>Wallpaper Splitter</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../assets/resources.qrc">
+   <iconset theme="io.github.l0drex.wallpaper_splitter" resource="../assets/resources.qrc">
     <normaloff>:/images/icon</normaloff>:/images/icon</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
