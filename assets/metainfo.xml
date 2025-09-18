@@ -22,6 +22,12 @@
     </description>
 
     <launchable type="desktop-id">io.github.l0drex.wallpaper_splitter.desktop</launchable>
+
+    <requires>
+        <control>keyboard</control>
+        <control>pointing</control>
+        <display_length compare="ge">768</display_length>
+    </requires>
     
     <icon type="stock">io.github.l0drex.wallpaper_splitter</icon>
     
@@ -44,7 +50,41 @@
     </screenshots>
     
     <releases>
-        <release version="1.0.0" date="2023-08-07">
+        <release version="1.1.2" date="2025-09-18">
+            <description>
+                <p>Change:</p>
+                <ul>
+                    <li>Text has now a more legible size</li>
+                    <li>Model number of the screens is now displayed</li>
+                    <li>Improved visuals a bit</li>
+                </ul>
+            </description>
+        </release>
+
+        <release version="1.1.1" date="2025-09-17">
+            <description>
+                <p>Change:</p>
+                <ul>
+                    <li>Updated urls in metadata to point to new repository url</li>
+                </ul>
+            </description>
+        </release>
+        
+        <release version="1.1.0" date="2025-09-17">
+            <url type="details">https://github.com/l0drex/wallpaper_splitter/releases/tag/v1.1.1</url>
+            <description>
+                <p>Add:</p>
+                <ul>
+                    <li>Desktop file, icon and metainfo</li>
+                </ul>
+                <p>Change:</p>
+                <ul>
+                    <li>Screenshot was updated to include the icon</li>
+                </ul>
+            </description>
+        </release>
+        
+        <release version="1.0.0" date="2025-03-27">
             <url type="details">https://github.com/l0drex/wallpaper_splitter/releases/tag/v1.0.0</url>
             <description>
                 <p>Initial Release</p>
@@ -56,10 +96,4 @@
             </description>
         </release>
     </releases>
-
-    <requires>
-        <control>keyboard</control>
-        <control>pointing</control>
-        <display_length compare="ge">768</display_length>
-    </requires>
 </component>
