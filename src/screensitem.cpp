@@ -34,7 +34,7 @@ void ScreensItem::addScreens() {
     auto screens = QApplication::screens();
     // get the currently used color scheme
     const auto colorScheme = KColorScheme();
-    const auto pen = QPen(colorScheme.foreground(KColorScheme::ForegroundRole::ActiveText), 2);
+    const auto pen = QPen(colorScheme.foreground(KColorScheme::ForegroundRole::ActiveText), 10);
 
     // I don't fully understand why this is necessary
     // most likely this will fail in different configs
