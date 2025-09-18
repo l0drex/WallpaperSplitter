@@ -4,6 +4,9 @@ project(wallpaper_splitter VERSION 1.1.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# necessary for JetBrain Fleet
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 find_package(Qt6 REQUIRED COMPONENTS
         Core
         Gui
@@ -37,7 +40,8 @@ install(FILES assets/icon.svg
     RENAME io.github.l0drex.wallpaper_splitter.svg)
 
 install(FILES assets/metainfo.xml
-    DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo)
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo
+    RENAME io.github.l0drex.wallpaper_splitter.metainfo.xml)
 
 install(FILES assets/wallpaper_splitter.desktop
     DESTINATION ${CMAKE_INSTALL_DATADIR}/applications

@@ -38,6 +38,7 @@
 
     <content_rating type="oars-1.1" />
 
+    <url type="homepage">https://github.com/l0drex/wallpaper_splitter</url>
     <url type="bugtracker">https://github.com/l0drex/wallpaper_splitter/issues</url>
     <url type="contribute">https://github.com/l0drex/wallpaper_splitter</url>
     <url type="vcs-browser">https://github.com/l0drex/wallpaper_splitter</url>
