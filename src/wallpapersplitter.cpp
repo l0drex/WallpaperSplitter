@@ -211,6 +211,16 @@ void WallpaperSplitter::resizeEvent(QResizeEvent *event) {
 
 void WallpaperSplitter::scaleView() {
     ui->graphicsView->fitInView(ui->graphicsView->scene()->itemsBoundingRect(), Qt::AspectRatioMode::KeepAspectRatio);
+
+    // center the first element
+    auto scene = ui->graphicsView->scene();
+    if (scene != nullptr) {
+        auto items = scene->items();
+        if (items.size() > 0) {
+            auto first = items.last();
+            ui->graphicsView->centerOn(first);
+        }
+    }
 }
 
 WallpaperSplitter::~WallpaperSplitter() {

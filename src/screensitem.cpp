@@ -8,6 +8,8 @@
 #include <QApplication>
 #include <QGraphicsSceneMouseEvent>
 #include <QDebug>
+#include <QGraphicsScene>
+#include <QGraphicsView>
 #include "screensitem.h"
 
 bool ScreenComparator(const QScreen *a, const QScreen *b) {
@@ -45,18 +47,19 @@ void ScreensItem::addScreens() {
         rect->setRect(screen->geometry());
         rect->setPen(pen);
         rect->setBrush(colorScheme.background(KColorScheme::BackgroundRole::ActiveBackground));
-        rect->setOpacity(0.5);
+        rect->setOpacity(0.75);
+        addToGroup(rect);
+        rectangles.append(rect);
 
         auto name = new QGraphicsTextItem(screen->model());
         name->adjustSize();
         name->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
-        // todo does not work
-        name->setTransformOriginPoint(name->boundingRect().center());
-        name->setPos(screen->geometry().center());
-        addToGroup(name);
 
-        addToGroup(rect);
-        rectangles.append(rect);
+        // todo center text
+        auto boundingRect = name->boundingRect();
+        name->setTransformOriginPoint(boundingRect.center());
+        name->setPos(screen->geometry().center() - boundingRect.center());
+        addToGroup(name);
     });
 }
 
