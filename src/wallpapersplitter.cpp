@@ -156,27 +156,33 @@ void WallpaperSplitter::applyWallpaper() {
     assert(!paths.isEmpty());
 
     // apply the wallpapers via a dbus call
-    QString script;
-    QTextStream out(&script);
-    // language=JavaScript
-    out << "var paths = ['" + paths.join("', '") + "'];"
-        << "var desktops = desktopsForActivity(currentActivity());"
-        << "for(let i in desktops) {"
-        << "    let d = desktops[i];"
-        << "    d.wallpaperPlugin = 'org.kde.image';"
-        << "    d.currentConfigGroup = ['Wallpaper', 'org.kde.image', 'General'];"
-        << "    d.writeConfig('Image', paths[i]);"
-        << "}";
     auto message = QDBusMessage::createMethodCall(
             "org.kde.plasmashell",
             "/PlasmaShell", "org.kde.PlasmaShell",
-            "evaluateScript");
-    message.setArguments(QVariantList() << QVariant(script));
-    qDebug() << "Applying image" << paths.join(", ");
-    auto reply = QDBusConnection::sessionBus().call(message);
-    if(reply.type() == QDBusMessage::ErrorMessage) {
-        qCritical() << "Something went wrong.";
-        qCritical() << reply.errorMessage();
+            "setWallpaper");
+
+    for (int i = 0; i < paths.size(); i++) {
+        QVariantList arguments;
+
+        // wallpaper plugin
+        arguments << QVariant(QString("org.kde.image"));
+
+        // parameters
+        QVariantMap params;
+        params.insert(QString("Image"), QVariant(paths.first()));
+        arguments << params;
+
+        // screenNum
+        arguments << QVariant((uint) i);
+
+        message.setArguments(arguments);
+
+        qDebug() << "Applying image" << paths.join(", ");
+        auto reply = QDBusConnection::sessionBus().call(message);
+        if(reply.type() == QDBusMessage::ErrorMessage) {
+            qCritical() << "Something went wrong.";
+            qCritical() << reply.errorMessage();
+        }
     }
 
     QApplication::quit();
